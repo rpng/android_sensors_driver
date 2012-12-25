@@ -47,6 +47,8 @@ import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
 
+import android.os.Build;
+
 /**
  * @author chadrockey@gmail.com (Chad Rockey)
  * @author axelfurlan@gmail.com (Axel Furlan)
@@ -141,7 +143,7 @@ public class ImuPublisher implements NodeMain
 			this.imu.getLinearAcceleration().setY(event.values[1]);
 			this.imu.getLinearAcceleration().setZ(event.values[2]);
 			
-			double[] tmpCov = {0.01,0,0, 0,0.01,0, 0,0,0.01};// TODO Make Parameter
+			double[] tmpCov = {0,0,0, 0,0,0, 0,0,0};// TODO Make Parameter
 			this.imu.setLinearAccelerationCovariance(tmpCov);
 			this.accelTime = event.timestamp;
 		}
@@ -150,7 +152,7 @@ public class ImuPublisher implements NodeMain
 			this.imu.getAngularVelocity().setX(event.values[0]);
 			this.imu.getAngularVelocity().setY(event.values[1]);
 			this.imu.getAngularVelocity().setZ(event.values[2]);
-			double[] tmpCov = {0.0025,0,0, 0,0.0025,0, 0,0,0.0025};// TODO Make Parameter
+			double[] tmpCov = {0,0,0, 0,0,0, 0,0,0};// TODO Make Parameter
 			this.imu.setAngularVelocityCovariance(tmpCov);
 	        this.gyroTime = event.timestamp;
 		}
@@ -162,7 +164,7 @@ public class ImuPublisher implements NodeMain
 	        this.imu.getOrientation().setX(quaternion[1]);
 	        this.imu.getOrientation().setY(quaternion[2]);
 	        this.imu.getOrientation().setZ(quaternion[3]);
-			double[] tmpCov = {0.001,0,0, 0,0.001,0, 0,0,0.001};// TODO Make Parameter
+			double[] tmpCov = {0,0,0, 0,0,0, 0,0,0};// TODO Make Parameter
 			this.imu.setOrientationCovariance(tmpCov);
 	       	this.quatTime = event.timestamp;
 		}
@@ -252,6 +254,9 @@ public class ImuPublisher implements NodeMain
 //@Override
   public void onShutdown(Node arg0)
   {
+	  if(this.imuThread == null){
+	  	  	return;
+	  }
 	  this.imuThread.shutdown();
 	
 	  try
