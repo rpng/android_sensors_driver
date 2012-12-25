@@ -47,8 +47,6 @@ import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
 
-import android.os.Build;
-
 /**
  * @author chadrockey@gmail.com (Chad Rockey)
  */
@@ -146,9 +144,6 @@ public class TemperaturePublisher implements NodeMain
   {
 	  try
 	  {
-	  		String msg = "BUILD SDK INT = " + Integer.toString(Build.VERSION.SDK_INT);
-	  		node.getLog().info(msg);
-
 			List<Sensor> mfList = this.sensorManager.getSensorList(Sensor.TYPE_AMBIENT_TEMPERATURE);
 			
 			if(mfList.size() > 0)

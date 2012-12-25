@@ -25,10 +25,6 @@ import android.hardware.SensorManager;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.Gravity;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
 import org.ros.address.InetAddressFactory;
@@ -36,7 +32,6 @@ import org.ros.android.RosActivitySherlock;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 
-import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.MenuInflater;
@@ -95,9 +90,8 @@ public class MainActivity extends RosActivitySherlock
   protected void init(NodeMainExecutor nodeMainExecutor)
   { 
     URI masterURI = getMasterUri();
-    masterURI = URI.create("http://192.168.15.247:11311/");
+    //masterURI = URI.create("http://192.168.15.247:11311/");
     //masterURI = URI.create("http://10.0.1.157:11311/");
-    int currentAPIVersion = android.os.Build.VERSION.SDK_INT;
     
     NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
     nodeConfiguration.setMasterUri(masterURI);

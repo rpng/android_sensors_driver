@@ -36,7 +36,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 
@@ -47,8 +46,6 @@ import sensor_msgs.Illuminance;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
-
-import android.os.Build;
 
 /**
  * @author chadrockey@gmail.com (Chad Rockey)
@@ -147,9 +144,6 @@ public class IlluminancePublisher implements NodeMain
   {
 	  try
 	  {
-	  		String msg = "BUILD SDK INT = " + Integer.toString(Build.VERSION.SDK_INT);
-	  		node.getLog().info(msg);
-
 			List<Sensor> mfList = this.sensorManager.getSensorList(Sensor.TYPE_LIGHT);
 			
 			if(mfList.size() > 0)
