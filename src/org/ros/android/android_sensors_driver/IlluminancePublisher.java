@@ -57,6 +57,7 @@ public class IlluminancePublisher implements NodeMain
   private SensorListener sensorListener;
   private SensorManager sensorManager;
   private Publisher<Illuminance> publisher;
+  private int sensorDelay;
   
   private class IlluminanceThread extends Thread
   {
@@ -78,7 +79,7 @@ public class IlluminancePublisher implements NodeMain
 	  {
 			Looper.prepare();
 			this.threadLooper = Looper.myLooper();
-			this.sensorManager.registerListener(this.sensorListener, this.ilSensor, SensorManager.SENSOR_DELAY_FASTEST);
+			this.sensorManager.registerListener(this.sensorListener, this.ilSensor, sensorDelay);
 			Looper.loop();
 	  }
 	    
@@ -126,9 +127,10 @@ public class IlluminancePublisher implements NodeMain
 	}
   }
   
-  public IlluminancePublisher(SensorManager manager)
+  public IlluminancePublisher(SensorManager manager, int sensorDelay)
   {
 	  this.sensorManager = manager;
+	  this.sensorDelay = sensorDelay;
   }
 
   public GraphName getDefaultNodeName()

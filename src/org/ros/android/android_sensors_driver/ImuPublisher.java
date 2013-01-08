@@ -31,13 +31,14 @@ package org.ros.android.android_sensors_driver;
 
 
 import java.util.List;
-
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Looper;
 import android.os.SystemClock;
+
+import android.util.Log;
 
 import org.ros.node.ConnectedNode;
 import org.ros.message.Time;
@@ -58,6 +59,7 @@ public class ImuPublisher implements NodeMain
   private SensorListener sensorListener;
   private SensorManager sensorManager;
   private Publisher<Imu> publisher;
+  private int sensorDelay;
   
   private class ImuThread extends Thread
   {
@@ -83,9 +85,9 @@ public class ImuPublisher implements NodeMain
 	  {
 			Looper.prepare();
 			this.threadLooper = Looper.myLooper();
-			this.sensorManager.registerListener(this.sensorListener, this.accelSensor, SensorManager.SENSOR_DELAY_FASTEST);
-			this.sensorManager.registerListener(this.sensorListener, this.gyroSensor, SensorManager.SENSOR_DELAY_FASTEST);
-			this.sensorManager.registerListener(this.sensorListener, this.quatSensor, SensorManager.SENSOR_DELAY_FASTEST);
+			this.sensorManager.registerListener(this.sensorListener, this.accelSensor, sensorDelay);
+			this.sensorManager.registerListener(this.sensorListener, this.gyroSensor, sensorDelay);
+			this.sensorManager.registerListener(this.sensorListener, this.quatSensor, sensorDelay);
 			Looper.loop();
 	  }
 	    
@@ -168,7 +170,9 @@ public class ImuPublisher implements NodeMain
 		}
 		
 		// Currently storing event times in case I filter them in the future.  Otherwise they are used to determine if all sensors have reported.
-		if((this.accelTime != 0 || !this.hasAccel) && (this.gyroTime != 0 || !this.hasGyro) && (this.quatTime != 0 || !this.hasQuat))
+		if((this.accelTime != 0 || !this.hasAccel) &&
+		   (this.gyroTime != 0 || !this.hasGyro) && 
+		   (this.quatTime != 0 || !this.hasQuat))
 		{
 			// Convert event.timestamp (nanoseconds uptime) into system time, use that as the header stamp
 			long time_delta_millis = System.currentTimeMillis() - SystemClock.uptimeMillis();
@@ -189,9 +193,10 @@ public class ImuPublisher implements NodeMain
   }
 
   
-  public ImuPublisher(SensorManager manager)
+  public ImuPublisher(SensorManager manager, int sensorDelay)
   {
 	  this.sensorManager = manager;
+	  this.sensorDelay = sensorDelay;
   }
 
   public GraphName getDefaultNodeName()
@@ -221,6 +226,7 @@ public class ImuPublisher implements NodeMain
 			}
 			
 			List<Sensor> gyroList = this.sensorManager.getSensorList(Sensor.TYPE_GYROSCOPE);
+			Log.i("GYRO", gyroList.toString());
 			if(gyroList.size() > 0)
 			{
 				hasGyro = true;

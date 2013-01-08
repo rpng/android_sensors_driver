@@ -57,12 +57,15 @@ public class TemperaturePublisher implements NodeMain
   private SensorListener sensorListener;
   private SensorManager sensorManager;
   private Publisher<Temperature> publisher;
+  private int sensorType;
+  private int sensorDelay;
   
   private class TemperatureThread extends Thread
   {
 	  private final SensorManager sensorManager;
 	  private SensorListener sensorListener;
 	  private Looper threadLooper;
+	  
 
 	  private final Sensor tmpSensor;
 	  
@@ -70,7 +73,7 @@ public class TemperaturePublisher implements NodeMain
 	  {
 		  this.sensorManager = sensorManager;
 		  this.sensorListener = sensorListener;
-		  this.tmpSensor = this.sensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
+		  this.tmpSensor = this.sensorManager.getDefaultSensor(sensorType);
 	  }
 	  
 	    
@@ -78,7 +81,7 @@ public class TemperaturePublisher implements NodeMain
 	  {
 			Looper.prepare();
 			this.threadLooper = Looper.myLooper();
-			this.sensorManager.registerListener(this.sensorListener, this.tmpSensor, SensorManager.SENSOR_DELAY_FASTEST);
+			this.sensorManager.registerListener(this.sensorListener, this.tmpSensor, sensorDelay);
 			Looper.loop();
 	  }
 	    
@@ -111,7 +114,7 @@ public class TemperaturePublisher implements NodeMain
 //	@Override
 	public void onSensorChanged(SensorEvent event)
 	{
-		if(event.sensor.getType() == Sensor.TYPE_AMBIENT_TEMPERATURE)
+		if(event.sensor.getType() == sensorType)
 		{
 			Temperature msg = this.publisher.newMessage();
 			long time_delta_millis = System.currentTimeMillis() - SystemClock.uptimeMillis();
@@ -126,14 +129,16 @@ public class TemperaturePublisher implements NodeMain
 	}
   }
   
-  public TemperaturePublisher(SensorManager manager)
+  public TemperaturePublisher(SensorManager manager, int sensorDelay, int sensorType)
   {
 	  this.sensorManager = manager;
+	  this.sensorDelay = sensorDelay;
+	  this.sensorType = sensorType;
   }
 
   public GraphName getDefaultNodeName()
   {
-	    return GraphName.of("android_sensors_driver/ambient_temperature_publisher");
+	    return GraphName.of("android_sensors_driver/temperature_publisher");
   }
   
   public void onError(Node node, Throwable throwable)
@@ -144,11 +149,11 @@ public class TemperaturePublisher implements NodeMain
   {
 	  try
 	  {
-			List<Sensor> mfList = this.sensorManager.getSensorList(Sensor.TYPE_AMBIENT_TEMPERATURE);
+			List<Sensor> mfList = this.sensorManager.getSensorList(sensorType);
 			
 			if(mfList.size() > 0)
 			{
-				this.publisher = node.newPublisher("android/ambient_temperature", "sensor_msgs/Temperature");
+				this.publisher = node.newPublisher("android/temperature", "sensor_msgs/Temperature");
 				this.sensorListener = new SensorListener(this.publisher);
 				this.tmpThread = new TemperatureThread(this.sensorManager, this.sensorListener);
 				this.tmpThread.start();		

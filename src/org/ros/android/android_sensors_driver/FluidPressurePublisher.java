@@ -57,6 +57,7 @@ public class FluidPressurePublisher implements NodeMain
   private SensorListener sensorListener;
   private SensorManager sensorManager;
   private Publisher<FluidPressure> publisher;
+  private int sensorDelay;
   
   private class FluidPressureThread extends Thread
   {
@@ -78,7 +79,7 @@ public class FluidPressurePublisher implements NodeMain
 	  {
 			Looper.prepare();
 			this.threadLooper = Looper.myLooper();
-			this.sensorManager.registerListener(this.sensorListener, this.fpSensor, SensorManager.SENSOR_DELAY_FASTEST);
+			this.sensorManager.registerListener(this.sensorListener, this.fpSensor, sensorDelay);
 			Looper.loop();
 	  }
 	    
@@ -126,9 +127,10 @@ public class FluidPressurePublisher implements NodeMain
 	}
   }
   
-  public FluidPressurePublisher(SensorManager manager)
+  public FluidPressurePublisher(SensorManager manager, int sensorDelay)
   {
 	  this.sensorManager = manager;
+	  this.sensorDelay = sensorDelay;
   }
 
   public GraphName getDefaultNodeName()

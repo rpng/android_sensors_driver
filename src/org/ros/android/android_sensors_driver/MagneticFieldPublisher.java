@@ -57,12 +57,14 @@ public class MagneticFieldPublisher implements NodeMain
   private SensorListener sensorListener;
   private SensorManager sensorManager;
   private Publisher<MagneticField> publisher;
+  private int sensorDelay;
   
   private class MagneticFieldThread extends Thread
   {
 	  private final SensorManager sensorManager;
 	  private SensorListener sensorListener;
 	  private Looper threadLooper;
+	  
 
 	  private final Sensor mfSensor;
 	  
@@ -78,7 +80,7 @@ public class MagneticFieldPublisher implements NodeMain
 	  {
 			Looper.prepare();
 			this.threadLooper = Looper.myLooper();
-			this.sensorManager.registerListener(this.sensorListener, this.mfSensor, SensorManager.SENSOR_DELAY_FASTEST);
+			this.sensorManager.registerListener(this.sensorListener, this.mfSensor, sensorDelay);
 			Looper.loop();
 	  }
 	    
@@ -131,9 +133,10 @@ public class MagneticFieldPublisher implements NodeMain
   }
 
   
-  public MagneticFieldPublisher(SensorManager manager)
+  public MagneticFieldPublisher(SensorManager manager, int sensorDelay)
   {
 	  this.sensorManager = manager;
+	  this.sensorDelay = sensorDelay;
   }
 
   public GraphName getDefaultNodeName()
