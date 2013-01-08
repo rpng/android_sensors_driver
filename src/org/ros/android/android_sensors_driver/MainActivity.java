@@ -86,7 +86,7 @@ public class MainActivity extends RosActivitySherlock
   }
 
   
-@Override
+  @Override
   protected void init(NodeMainExecutor nodeMainExecutor)
   { 
     URI masterURI = getMasterUri();

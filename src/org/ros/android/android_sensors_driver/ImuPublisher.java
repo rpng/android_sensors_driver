@@ -38,8 +38,6 @@ import android.hardware.SensorManager;
 import android.os.Looper;
 import android.os.SystemClock;
 
-import android.util.Log;
-
 import org.ros.node.ConnectedNode;
 import org.ros.message.Time;
 import org.ros.namespace.GraphName;
@@ -226,7 +224,6 @@ public class ImuPublisher implements NodeMain
 			}
 			
 			List<Sensor> gyroList = this.sensorManager.getSensorList(Sensor.TYPE_GYROSCOPE);
-			Log.i("GYRO", gyroList.toString());
 			if(gyroList.size() > 0)
 			{
 				hasGyro = true;
