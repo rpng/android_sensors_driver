@@ -30,8 +30,6 @@
 package org.ros.android.android_sensors_driver;
 
 
-import java.util.List;
-
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -39,163 +37,140 @@ import android.hardware.SensorManager;
 import android.os.Looper;
 import android.os.SystemClock;
 
-import org.ros.node.ConnectedNode;
 import org.ros.message.Time;
 import org.ros.namespace.GraphName;
-import sensor_msgs.Temperature;
+import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
 
+import java.util.List;
+
+import sensor_msgs.Temperature;
+
 /**
  * @author chadrockey@gmail.com (Chad Rockey)
+ * @author tal.regev@gmail.com  (Tal Regev)
  */
-public class TemperaturePublisher implements NodeMain
-{
+public class TemperaturePublisher implements NodeMain {
 
-  private TemperatureThread tmpThread;
-  private SensorListener sensorListener;
-  private SensorManager sensorManager;
-  private Publisher<Temperature> publisher;
-  private int sensorType;
-  private int sensorDelay;
-  
-  private class TemperatureThread extends Thread
-  {
-	  private final SensorManager sensorManager;
-	  private SensorListener sensorListener;
-	  private Looper threadLooper;
-	  
-
-	  private final Sensor tmpSensor;
-	  
-	  private TemperatureThread(SensorManager sensorManager, SensorListener sensorListener)
-	  {
-		  this.sensorManager = sensorManager;
-		  this.sensorListener = sensorListener;
-		  this.tmpSensor = this.sensorManager.getDefaultSensor(sensorType);
-	  }
-	  
-	    
-	  public void run()
-	  {
-			Looper.prepare();
-			this.threadLooper = Looper.myLooper();
-			this.sensorManager.registerListener(this.sensorListener, this.tmpSensor, sensorDelay);
-			Looper.loop();
-	  }
-	    
-	    
-	  public void shutdown()
-	  {
-	    	this.sensorManager.unregisterListener(this.sensorListener);
-	    	if(this.threadLooper != null)
-	    	{
-	            this.threadLooper.quit();
-	    	}
-	  }
-	}
-  
-  private class SensorListener implements SensorEventListener
-  {
-
+    private String robotName;
+    private TemperatureThread tmpThread;
+    private SensorListener sensorListener;
+    private SensorManager sensorManager;
     private Publisher<Temperature> publisher;
+    private int sensorType;
+    private int sensorDelay;
 
-    private SensorListener(Publisher<Temperature> publisher)
-    {
-      this.publisher = publisher;
+    public TemperaturePublisher(SensorManager manager, int sensorDelay, int sensorType, String robotName) {
+        this.sensorManager = manager;
+        this.sensorDelay = sensorDelay;
+        this.sensorType = sensorType;
+        this.robotName = robotName;
     }
 
-//	@Override
-	public void onAccuracyChanged(Sensor sensor, int accuracy)
-	{
-	}
+    public GraphName getDefaultNodeName() {
+        return GraphName.of("android_sensors_driver/temperature_publisher");
+    }
 
-//	@Override
-	public void onSensorChanged(SensorEvent event)
-	{
-		if(event.sensor.getType() == sensorType)
-		{
-			Temperature msg = this.publisher.newMessage();
-			long time_delta_millis = System.currentTimeMillis() - SystemClock.uptimeMillis();
-			msg.getHeader().setStamp(Time.fromMillis(time_delta_millis + event.timestamp/1000000));
-			msg.getHeader().setFrameId("/android/temperature");// TODO Make parameter
+    public void onError(Node node, Throwable throwable) {
+    }
 
-			msg.setTemperature(event.values[0]);
-			msg.setVariance(0.0);
+    public void onStart(ConnectedNode node) {
+        try {
+            List<Sensor> mfList = this.sensorManager.getSensorList(sensorType);
 
-			this.publisher.publish(msg);
-		}
-	}
-  }
-  
-  public TemperaturePublisher(SensorManager manager, int sensorDelay, int sensorType)
-  {
-	  this.sensorManager = manager;
-	  this.sensorDelay = sensorDelay;
-	  this.sensorType = sensorType;
-  }
+            if (mfList.size() > 0) {
+                this.publisher = node.newPublisher(robotName + "/android/temperature", "sensor_msgs/Temperature");
+                this.sensorListener = new SensorListener(this.publisher);
+                this.tmpThread = new TemperatureThread(this.sensorManager, this.sensorListener);
+                this.tmpThread.start();
+            }
 
-  public GraphName getDefaultNodeName()
-  {
-	    return GraphName.of("android_sensors_driver/temperature_publisher");
-  }
-  
-  public void onError(Node node, Throwable throwable)
-  {
-  }
+        } catch (Exception e) {
+            if (node != null) {
+                node.getLog().fatal(e);
+            } else {
+                e.printStackTrace();
+            }
+        }
+    }
 
-  public void onStart(ConnectedNode node)
-  {
-	  try
-	  {
-			List<Sensor> mfList = this.sensorManager.getSensorList(sensorType);
-			
-			if(mfList.size() > 0)
-			{
-				this.publisher = node.newPublisher("android/temperature", "sensor_msgs/Temperature");
-				this.sensorListener = new SensorListener(this.publisher);
-				this.tmpThread = new TemperatureThread(this.sensorManager, this.sensorListener);
-				this.tmpThread.start();		
-			}			
+    //@Override
+    public void onShutdown(Node arg0) {
+        if (this.tmpThread == null) {
+            return;
+        }
 
-	  }
-	  catch (Exception e)
-	  {
-		  if (node != null)
-		  {
-			  node.getLog().fatal(e);
-		  }
-		  else
-		  {
-			  e.printStackTrace();
-		  }
-	  }
-  }
+        this.tmpThread.shutdown();
 
-//@Override
-  public void onShutdown(Node arg0)
-  {
-  	  if(this.tmpThread == null){
-  	  	return;
-  	  }
+        try {
+            this.tmpThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 
-	  this.tmpThread.shutdown();
-	
-	  try
-	  {
-		  this.tmpThread.join();
-	  }
-	  catch (InterruptedException e)
-	  {
-		  e.printStackTrace();
-	  }
-  }
+    //@Override
+    public void onShutdownComplete(Node arg0) {
+    }
 
-//@Override
-  public void onShutdownComplete(Node arg0)
-  {
-  }
+    private class TemperatureThread extends Thread {
+        private final SensorManager sensorManager;
+        private final Sensor tmpSensor;
+        private SensorListener sensorListener;
+        private Looper threadLooper;
+
+        private TemperatureThread(SensorManager sensorManager, SensorListener sensorListener) {
+            this.sensorManager = sensorManager;
+            this.sensorListener = sensorListener;
+            this.tmpSensor = this.sensorManager.getDefaultSensor(sensorType);
+        }
+
+
+        public void run() {
+            Looper.prepare();
+            this.threadLooper = Looper.myLooper();
+            this.sensorManager.registerListener(this.sensorListener, this.tmpSensor, sensorDelay);
+            Looper.loop();
+        }
+
+
+        public void shutdown() {
+            this.sensorManager.unregisterListener(this.sensorListener);
+            if (this.threadLooper != null) {
+                this.threadLooper.quit();
+            }
+        }
+    }
+
+    private class SensorListener implements SensorEventListener {
+
+        private Publisher<Temperature> publisher;
+
+        private SensorListener(Publisher<Temperature> publisher) {
+            this.publisher = publisher;
+        }
+
+        //	@Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        }
+
+        //	@Override
+        public void onSensorChanged(SensorEvent event) {
+            if (event.sensor.getType() == sensorType) {
+                Temperature msg = this.publisher.newMessage();
+                long time_delta_millis = System.currentTimeMillis() - SystemClock.uptimeMillis();
+                msg.getHeader().setStamp(Time.fromMillis(time_delta_millis + event.timestamp / 1000000));
+                msg.getHeader().setFrameId("/android/temperature");// TODO Make parameter
+
+                msg.setTemperature(event.values[0]);
+                msg.setVariance(0.0);
+
+                this.publisher.publish(msg);
+            }
+        }
+    }
 
 }
 
