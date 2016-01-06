@@ -27,7 +27,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.ros.android.android_sensors_driver;
+package org.ros.android.android_sensors_driver.publishers;
 
 import android.location.Location;
 import android.location.LocationListener;

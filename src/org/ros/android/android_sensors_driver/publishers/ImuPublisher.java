@@ -27,7 +27,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.ros.android.android_sensors_driver;
+package org.ros.android.android_sensors_driver.publishers;
 
 
 import android.hardware.Sensor;
@@ -48,7 +48,7 @@ import java.util.List;
 
 import sensor_msgs.Imu;
 
-/**
+/**`
  * @author chadrockey@gmail.com (Chad Rockey)
  * @author axelfurlan@gmail.com (Axel Furlan)
  * @author tal.regev@gmail.com  (Tal Regev)

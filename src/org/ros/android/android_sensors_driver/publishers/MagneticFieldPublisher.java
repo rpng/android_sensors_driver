@@ -27,7 +27,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.ros.android.android_sensors_driver;
+package org.ros.android.android_sensors_driver.publishers;
 
 
 import android.hardware.Sensor;
@@ -46,29 +46,29 @@ import org.ros.node.topic.Publisher;
 
 import java.util.List;
 
-import sensor_msgs.FluidPressure;
+import sensor_msgs.MagneticField;
 
 /**
  * @author chadrockey@gmail.com (Chad Rockey)
  * @author tal.regev@gmail.com  (Tal Regev)
  */
-public class FluidPressurePublisher implements NodeMain {
+public class MagneticFieldPublisher implements NodeMain {
 
     private String robotName;
-    private FluidPressureThread fpThread;
+    private MagneticFieldThread mfThread;
     private SensorListener sensorListener;
     private SensorManager sensorManager;
-    private Publisher<FluidPressure> publisher;
+    private Publisher<MagneticField> publisher;
     private int sensorDelay;
 
-    public FluidPressurePublisher(SensorManager manager, int sensorDelay, String robotName) {
+    public MagneticFieldPublisher(SensorManager manager, int sensorDelay,String robotName) {
         this.sensorManager = manager;
         this.sensorDelay = sensorDelay;
         this.robotName = robotName;
     }
 
     public GraphName getDefaultNodeName() {
-        return GraphName.of("android_sensors_driver/fluid_pressure_publisher");
+        return GraphName.of("android_sensors_driver/magnetic_field_publisher");
     }
 
     public void onError(Node node, Throwable throwable) {
@@ -76,13 +76,13 @@ public class FluidPressurePublisher implements NodeMain {
 
     public void onStart(ConnectedNode node) {
         try {
-            List<Sensor> mfList = this.sensorManager.getSensorList(Sensor.TYPE_PRESSURE);
+            List<Sensor> mfList = this.sensorManager.getSensorList(Sensor.TYPE_MAGNETIC_FIELD);
 
             if (mfList.size() > 0) {
-                this.publisher = node.newPublisher(robotName + "/android/barometric_pressure", "sensor_msgs/FluidPressure");
+                this.publisher = node.newPublisher(robotName + "/android/magnetic_field", "sensor_msgs/MagneticField");
                 this.sensorListener = new SensorListener(this.publisher);
-                this.fpThread = new FluidPressureThread(this.sensorManager, this.sensorListener);
-                this.fpThread.start();
+                this.mfThread = new MagneticFieldThread(this.sensorManager, this.sensorListener);
+                this.mfThread.start();
             }
 
         } catch (Exception e) {
@@ -96,14 +96,14 @@ public class FluidPressurePublisher implements NodeMain {
 
     //@Override
     public void onShutdown(Node arg0) {
-        if (this.fpThread == null) {
+        if (this.mfThread == null) {
             return;
         }
 
-        this.fpThread.shutdown();
+        this.mfThread.shutdown();
 
         try {
-            this.fpThread.join();
+            this.mfThread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -113,23 +113,23 @@ public class FluidPressurePublisher implements NodeMain {
     public void onShutdownComplete(Node arg0) {
     }
 
-    private class FluidPressureThread extends Thread {
+    private class MagneticFieldThread extends Thread {
         private final SensorManager sensorManager;
-        private final Sensor fpSensor;
+        private final Sensor mfSensor;
         private SensorListener sensorListener;
         private Looper threadLooper;
 
-        private FluidPressureThread(SensorManager sensorManager, SensorListener sensorListener) {
+        private MagneticFieldThread(SensorManager sensorManager, SensorListener sensorListener) {
             this.sensorManager = sensorManager;
             this.sensorListener = sensorListener;
-            this.fpSensor = this.sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
+            this.mfSensor = this.sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         }
 
 
         public void run() {
             Looper.prepare();
             this.threadLooper = Looper.myLooper();
-            this.sensorManager.registerListener(this.sensorListener, this.fpSensor, sensorDelay);
+            this.sensorManager.registerListener(this.sensorListener, this.mfSensor, sensorDelay);
             Looper.loop();
         }
 
@@ -144,9 +144,9 @@ public class FluidPressurePublisher implements NodeMain {
 
     private class SensorListener implements SensorEventListener {
 
-        private Publisher<FluidPressure> publisher;
+        private Publisher<MagneticField> publisher;
 
-        private SensorListener(Publisher<FluidPressure> publisher) {
+        private SensorListener(Publisher<MagneticField> publisher) {
             this.publisher = publisher;
         }
 
@@ -156,14 +156,18 @@ public class FluidPressurePublisher implements NodeMain {
 
         //	@Override
         public void onSensorChanged(SensorEvent event) {
-            if (event.sensor.getType() == Sensor.TYPE_PRESSURE) {
-                FluidPressure msg = this.publisher.newMessage();
+            if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+                MagneticField msg = this.publisher.newMessage();
                 long time_delta_millis = System.currentTimeMillis() - SystemClock.uptimeMillis();
                 msg.getHeader().setStamp(Time.fromMillis(time_delta_millis + event.timestamp / 1000000));
-                msg.getHeader().setFrameId("/barometric_pressure");// TODO Make parameter
+                msg.getHeader().setFrameId("/magnetic_field");// TODO Make parameter
 
-                msg.setFluidPressure(100.0 * event.values[0]); // Reported in hPa, need to output in Pa
-                msg.setVariance(0.0);
+                msg.getMagneticField().setX(event.values[0] / 1e6);
+                msg.getMagneticField().setY(event.values[1] / 1e6);
+                msg.getMagneticField().setZ(event.values[2] / 1e6);
+
+                double[] tmpCov = {0, 0, 0, 0, 0, 0, 0, 0, 0}; // TODO Make Parameter
+                msg.setMagneticFieldCovariance(tmpCov);
 
                 publisher.publish(msg);
             }

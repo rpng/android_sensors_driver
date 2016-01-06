@@ -16,7 +16,7 @@
 
 dependencies {
     compile('org.ros.rosjava_core:rosjava:[0.1,0.2)')
-    compile('org.ros.android_core:android_gingerbread_mr1:[0.1,0.2)')
+    compile('org.ros.android_core:android_honeycomb_mr2:0.1.+')
 }
 
 apply plugin: 'com.android.application'
@@ -25,7 +25,7 @@ android {
     compileSdkVersion 21
 
     defaultConfig {
-        minSdkVersion 10
+        minSdkVersion 15
         applicationId "org.ros.android.android_sensors_driver"
         targetSdkVersion 15
         versionCode 1

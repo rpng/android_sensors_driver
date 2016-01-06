@@ -1,7 +1,13 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:background="#000000"
-    android:orientation="vertical">
-</LinearLayout>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Contains the "content" view and its children. -->
+    <include layout="@layout/view_config" />
+
+    <!-- The "loading indicator" view. This view overlaps with
+         the content, so the visibility of these two views
+         should be mutually exclusive. -->
+    <include layout="@layout/view_main" />
+
+</FrameLayout>

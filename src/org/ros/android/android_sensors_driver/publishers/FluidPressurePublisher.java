@@ -27,7 +27,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.ros.android.android_sensors_driver;
+package org.ros.android.android_sensors_driver.publishers;
 
 
 import android.hardware.Sensor;
@@ -46,31 +46,29 @@ import org.ros.node.topic.Publisher;
 
 import java.util.List;
 
-import sensor_msgs.Temperature;
+import sensor_msgs.FluidPressure;
 
 /**
  * @author chadrockey@gmail.com (Chad Rockey)
  * @author tal.regev@gmail.com  (Tal Regev)
  */
-public class TemperaturePublisher implements NodeMain {
+public class FluidPressurePublisher implements NodeMain {
 
     private String robotName;
-    private TemperatureThread tmpThread;
+    private FluidPressureThread fpThread;
     private SensorListener sensorListener;
     private SensorManager sensorManager;
-    private Publisher<Temperature> publisher;
-    private int sensorType;
+    private Publisher<FluidPressure> publisher;
     private int sensorDelay;
 
-    public TemperaturePublisher(SensorManager manager, int sensorDelay, int sensorType, String robotName) {
+    public FluidPressurePublisher(SensorManager manager, int sensorDelay, String robotName) {
         this.sensorManager = manager;
         this.sensorDelay = sensorDelay;
-        this.sensorType = sensorType;
         this.robotName = robotName;
     }
 
     public GraphName getDefaultNodeName() {
-        return GraphName.of("android_sensors_driver/temperature_publisher");
+        return GraphName.of("android_sensors_driver/fluid_pressure_publisher");
     }
 
     public void onError(Node node, Throwable throwable) {
@@ -78,13 +76,13 @@ public class TemperaturePublisher implements NodeMain {
 
     public void onStart(ConnectedNode node) {
         try {
-            List<Sensor> mfList = this.sensorManager.getSensorList(sensorType);
+            List<Sensor> mfList = this.sensorManager.getSensorList(Sensor.TYPE_PRESSURE);
 
             if (mfList.size() > 0) {
-                this.publisher = node.newPublisher(robotName + "/android/temperature", "sensor_msgs/Temperature");
+                this.publisher = node.newPublisher(robotName + "/android/barometric_pressure", "sensor_msgs/FluidPressure");
                 this.sensorListener = new SensorListener(this.publisher);
-                this.tmpThread = new TemperatureThread(this.sensorManager, this.sensorListener);
-                this.tmpThread.start();
+                this.fpThread = new FluidPressureThread(this.sensorManager, this.sensorListener);
+                this.fpThread.start();
             }
 
         } catch (Exception e) {
@@ -98,14 +96,14 @@ public class TemperaturePublisher implements NodeMain {
 
     //@Override
     public void onShutdown(Node arg0) {
-        if (this.tmpThread == null) {
+        if (this.fpThread == null) {
             return;
         }
 
-        this.tmpThread.shutdown();
+        this.fpThread.shutdown();
 
         try {
-            this.tmpThread.join();
+            this.fpThread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -115,23 +113,23 @@ public class TemperaturePublisher implements NodeMain {
     public void onShutdownComplete(Node arg0) {
     }
 
-    private class TemperatureThread extends Thread {
+    private class FluidPressureThread extends Thread {
         private final SensorManager sensorManager;
-        private final Sensor tmpSensor;
+        private final Sensor fpSensor;
         private SensorListener sensorListener;
         private Looper threadLooper;
 
-        private TemperatureThread(SensorManager sensorManager, SensorListener sensorListener) {
+        private FluidPressureThread(SensorManager sensorManager, SensorListener sensorListener) {
             this.sensorManager = sensorManager;
             this.sensorListener = sensorListener;
-            this.tmpSensor = this.sensorManager.getDefaultSensor(sensorType);
+            this.fpSensor = this.sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
         }
 
 
         public void run() {
             Looper.prepare();
             this.threadLooper = Looper.myLooper();
-            this.sensorManager.registerListener(this.sensorListener, this.tmpSensor, sensorDelay);
+            this.sensorManager.registerListener(this.sensorListener, this.fpSensor, sensorDelay);
             Looper.loop();
         }
 
@@ -146,9 +144,9 @@ public class TemperaturePublisher implements NodeMain {
 
     private class SensorListener implements SensorEventListener {
 
-        private Publisher<Temperature> publisher;
+        private Publisher<FluidPressure> publisher;
 
-        private SensorListener(Publisher<Temperature> publisher) {
+        private SensorListener(Publisher<FluidPressure> publisher) {
             this.publisher = publisher;
         }
 
@@ -158,16 +156,16 @@ public class TemperaturePublisher implements NodeMain {
 
         //	@Override
         public void onSensorChanged(SensorEvent event) {
-            if (event.sensor.getType() == sensorType) {
-                Temperature msg = this.publisher.newMessage();
+            if (event.sensor.getType() == Sensor.TYPE_PRESSURE) {
+                FluidPressure msg = this.publisher.newMessage();
                 long time_delta_millis = System.currentTimeMillis() - SystemClock.uptimeMillis();
                 msg.getHeader().setStamp(Time.fromMillis(time_delta_millis + event.timestamp / 1000000));
-                msg.getHeader().setFrameId("/android/temperature");// TODO Make parameter
+                msg.getHeader().setFrameId("/barometric_pressure");// TODO Make parameter
 
-                msg.setTemperature(event.values[0]);
+                msg.setFluidPressure(100.0 * event.values[0]); // Reported in hPa, need to output in Pa
                 msg.setVariance(0.0);
 
-                this.publisher.publish(msg);
+                publisher.publish(msg);
             }
         }
     }
