@@ -17,4 +17,5 @@
     <string name="field_pub_navsat">Navigation Satellite Publisher</string>
     <string name="field_pub_temp">Temperature Publisher</string>
     <string name="robot_name_hint">tango1</string>
+    <string name="button_config">Configure Driver</string>
 </resources>
