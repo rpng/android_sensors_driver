@@ -9,5 +9,12 @@
     <string name="help_wiki">Wiki</string>
     <string name="phone1">phone1</string>
     <string name="robot_name">Robot Name:</string>
-
+    <string name="field_robot_name">Robot Name:</string>
+    <string name="field_pub_fluid">Fluid Pressure Publisher</string>
+    <string name="field_pub_illuminance">Illuminance Publisher</string>
+    <string name="field_pub_imu">IMU Publisher</string>
+    <string name="field_pub_magnetic">Magnetic Field Publisher</string>
+    <string name="field_pub_navsat">Navigation Satellite Publisher</string>
+    <string name="field_pub_temp">Temperature Publisher</string>
+    <string name="robot_name_hint">tango1</string>
 </resources>

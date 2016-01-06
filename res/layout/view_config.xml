@@ -4,19 +4,198 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
-    android:background="#ff0000">
+    android:background="#000000">
 
-    <TextView
-        android:id="@+id/textView1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="I'm screen 2 (activity_config.xml)"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
-
-    <Button
-        android:id="@+id/button2"
+    <ScrollView
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="Click me to another screen" />
+        android:layout_height="fill_parent"
+        android:id="@+id/scrollView"
+        android:layout_gravity="center_horizontal" >
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:layout_margin="5dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="fill_parent"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="@string/field_robot_name"
+                    android:id="@+id/textView"
+                    android:gravity="center_vertical"
+                    android:layout_marginRight="10dp" />
+
+                <EditText
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/robot_name"
+                    android:hint="@string/robot_name_hint"
+                    android:inputType="text" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="?android:attr/listDivider" />
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <CheckBox
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:text="@string/field_pub_fluid"
+                    android:id="@+id/checkbox_fluid"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:layout_margin="5dp"
+                    android:checked="true"
+                    android:enabled="true" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+
+                <CheckBox
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:text="@string/field_pub_illuminance"
+                    android:id="@+id/checkbox_illuminance"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:layout_margin="5dp"
+                    android:checked="true"
+                    android:enabled="true" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+
+                <CheckBox
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:text="@string/field_pub_imu"
+                    android:id="@+id/checkbox_imu"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:layout_margin="5dp"
+                    android:checked="true"
+                    android:enabled="true" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+
+                <CheckBox
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:text="@string/field_pub_magnetic"
+                    android:id="@+id/checkbox_magnetic"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:layout_margin="5dp"
+                    android:checked="true"
+                    android:enabled="true" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+
+                <CheckBox
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:text="@string/field_pub_navsat"
+                    android:id="@+id/checkbox_navsat"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:layout_margin="5dp"
+                    android:checked="true"
+                    android:enabled="true" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+
+                <CheckBox
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:text="@string/field_pub_temp"
+                    android:id="@+id/checkbox_temp"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:layout_margin="5dp"
+                    android:checked="true"
+                    android:enabled="true" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="?android:attr/listDivider" />
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+
+                <CheckBox
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:text="Camera 1 (320x420) 27.00deg"
+                    android:id="@+id/checkbox_cam1"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:layout_margin="5dp"
+                    android:checked="false"
+                    android:enabled="false" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+
+                <CheckBox
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:text="Camera 2 (1200x600) 135.35deg"
+                    android:id="@+id/checkbox_cam2"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:layout_margin="5dp"
+                    android:checked="false"
+                    android:enabled="false" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+
+                <CheckBox
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:text="Camera 3 (400x230) 95.03deg"
+                    android:id="@+id/checkbox_cam3"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:layout_margin="5dp"
+                    android:checked="false"
+                    android:enabled="false" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>
