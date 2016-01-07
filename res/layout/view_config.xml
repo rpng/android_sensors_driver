@@ -54,7 +54,7 @@
                 android:layout_height="match_parent">
 
                 <CheckBox
-                    android:layout_width="fill_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="fill_parent"
                     android:text="@string/field_pub_fluid"
                     android:id="@+id/checkbox_fluid"
@@ -70,7 +70,7 @@
                 android:layout_height="match_parent" >
 
                 <CheckBox
-                    android:layout_width="fill_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="fill_parent"
                     android:text="@string/field_pub_illuminance"
                     android:id="@+id/checkbox_illuminance"
@@ -86,7 +86,7 @@
                 android:layout_height="match_parent" >
 
                 <CheckBox
-                    android:layout_width="fill_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="fill_parent"
                     android:text="@string/field_pub_imu"
                     android:id="@+id/checkbox_imu"
@@ -102,7 +102,7 @@
                 android:layout_height="match_parent" >
 
                 <CheckBox
-                    android:layout_width="fill_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="fill_parent"
                     android:text="@string/field_pub_magnetic"
                     android:id="@+id/checkbox_magnetic"
@@ -118,7 +118,7 @@
                 android:layout_height="match_parent" >
 
                 <CheckBox
-                    android:layout_width="fill_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="fill_parent"
                     android:text="@string/field_pub_navsat"
                     android:id="@+id/checkbox_navsat"
@@ -134,7 +134,7 @@
                 android:layout_height="match_parent" >
 
                 <CheckBox
-                    android:layout_width="fill_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="fill_parent"
                     android:text="@string/field_pub_temp"
                     android:id="@+id/checkbox_temp"
@@ -155,7 +155,7 @@
                 android:layout_height="match_parent" >
 
                 <CheckBox
-                    android:layout_width="fill_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="fill_parent"
                     android:text="Camera 1 (320x420) 27.00deg"
                     android:id="@+id/checkbox_cam1"
@@ -171,7 +171,7 @@
                 android:layout_height="match_parent" >
 
                 <CheckBox
-                    android:layout_width="fill_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="fill_parent"
                     android:text="Camera 2 (1200x600) 135.35deg"
                     android:id="@+id/checkbox_cam2"
@@ -187,7 +187,7 @@
                 android:layout_height="match_parent" >
 
                 <CheckBox
-                    android:layout_width="fill_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="fill_parent"
                     android:text="Camera 3 (400x230) 95.03deg"
                     android:id="@+id/checkbox_cam3"
@@ -207,6 +207,9 @@
         android:id="@+id/config_submit"
         android:layout_gravity="center_horizontal"
         android:gravity="center"
-        android:layout_marginTop="5dp" />
+        android:layout_marginTop="5dp"
+        android:textStyle="bold"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:minHeight="80dp" />
 
 </LinearLayout>

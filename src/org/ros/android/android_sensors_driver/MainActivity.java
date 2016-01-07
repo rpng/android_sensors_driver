@@ -25,6 +25,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -93,7 +95,23 @@ public class MainActivity extends RosActivity {
         button_config.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
                 // Update the publishers
-                config.update_publishers();
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        try {
+                            // Try to update
+                            config.update_publishers();
+                        } catch(Exception e) {
+                            // Tell the user it failed
+                            Toast toast = Toast.makeText(MainActivity.this,
+                                    "Driver Configuration Failed", Toast.LENGTH_SHORT);
+                            toast.show();
+                            // Re-enable button
+                            button_config.setEnabled(true);
+                            // Debug
+                            e.printStackTrace();
+                        }
+                    }
+                });
                 // Toggle the views
                 toggleConfigView();
             }

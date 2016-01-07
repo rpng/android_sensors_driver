@@ -7,7 +7,6 @@
     <string name="help_ok">OK</string>
     <string name="help_report">Report</string>
     <string name="help_wiki">Wiki</string>
-    <string name="phone1">phone1</string>
     <string name="robot_name">Robot Name:</string>
     <string name="field_robot_name">Robot Name:</string>
     <string name="field_pub_fluid">Fluid Pressure Publisher</string>

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.location.LocationManager;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 
@@ -36,6 +37,7 @@ public class Config {
     protected CheckBox checkbox_magnetic;
     protected CheckBox checkbox_navsat;
     protected CheckBox checkbox_temp;
+    protected Button button_config;
 
     protected String old_robot_name;
     protected boolean old_fluid;
@@ -70,6 +72,7 @@ public class Config {
         checkbox_magnetic = (CheckBox) mainActivity.findViewById(R.id.checkbox_magnetic);
         checkbox_navsat = (CheckBox) mainActivity.findViewById(R.id.checkbox_navsat);
         checkbox_temp = (CheckBox) mainActivity.findViewById(R.id.checkbox_temp);
+        button_config = (Button) mainActivity.findViewById(R.id.config_submit);
 
         // Load old variables, booleans default to false
         old_robot_name = robot_name.getText().toString();
@@ -86,6 +89,8 @@ public class Config {
      * Each node's state is stored so we do not restart already started nodes
      */
     public void update_publishers() {
+        // Dis-enable button
+        button_config.setEnabled(false);
         // Get the name of the robot
         String robot_name_text = robot_name.getText().toString();
         // 10,000 us == 100 Hz for Android 3.1 and above
@@ -208,6 +213,9 @@ public class Config {
         old_magnetic = checkbox_magnetic.isChecked();
         old_navsat = checkbox_navsat.isChecked();
         old_temp = checkbox_temp.isChecked();
+
+        // Re-enable button
+        button_config.setEnabled(true);
     }
 
     /**

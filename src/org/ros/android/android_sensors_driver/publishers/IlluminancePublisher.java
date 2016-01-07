@@ -160,7 +160,7 @@ public class IlluminancePublisher implements NodeMain {
                 Illuminance msg = this.publisher.newMessage();
                 long time_delta_millis = System.currentTimeMillis() - SystemClock.uptimeMillis();
                 msg.getHeader().setStamp(Time.fromMillis(time_delta_millis + event.timestamp / 1000000));
-                msg.getHeader().setFrameId("/illuminance"); // TODO Make parameter
+                msg.getHeader().setFrameId("/android/illuminance"); // TODO Make parameter
 
                 msg.setIlluminance(event.values[0]);
                 msg.setVariance(0.0); // TODO Make parameter

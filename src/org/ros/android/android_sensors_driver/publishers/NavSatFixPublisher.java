@@ -145,7 +145,7 @@ public class NavSatFixPublisher implements NodeMain {
         public void onLocationChanged(Location location) {
             NavSatFix fix = this.publisher.newMessage();
             fix.getHeader().setStamp(Time.fromMillis(System.currentTimeMillis()));
-            fix.getHeader().setFrameId("/gps");
+            fix.getHeader().setFrameId("/android/gps");
 
             fix.getStatus().setStatus(currentStatus);
             fix.getStatus().setService(NavSatStatus.SERVICE_GPS);

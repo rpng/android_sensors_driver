@@ -160,7 +160,7 @@ public class FluidPressurePublisher implements NodeMain {
                 FluidPressure msg = this.publisher.newMessage();
                 long time_delta_millis = System.currentTimeMillis() - SystemClock.uptimeMillis();
                 msg.getHeader().setStamp(Time.fromMillis(time_delta_millis + event.timestamp / 1000000));
-                msg.getHeader().setFrameId("/barometric_pressure");// TODO Make parameter
+                msg.getHeader().setFrameId("/android/barometric_pressure");// TODO Make parameter
 
                 msg.setFluidPressure(100.0 * event.values[0]); // Reported in hPa, need to output in Pa
                 msg.setVariance(0.0);

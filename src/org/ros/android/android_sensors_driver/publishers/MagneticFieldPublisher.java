@@ -160,7 +160,7 @@ public class MagneticFieldPublisher implements NodeMain {
                 MagneticField msg = this.publisher.newMessage();
                 long time_delta_millis = System.currentTimeMillis() - SystemClock.uptimeMillis();
                 msg.getHeader().setStamp(Time.fromMillis(time_delta_millis + event.timestamp / 1000000));
-                msg.getHeader().setFrameId("/magnetic_field");// TODO Make parameter
+                msg.getHeader().setFrameId("/android/magnetic_field");// TODO Make parameter
 
                 msg.getMagneticField().setX(event.values[0] / 1e6);
                 msg.getMagneticField().setY(event.values[1] / 1e6);

@@ -229,7 +229,7 @@ public class ImuPublisher implements NodeMain {
                 // Convert event.timestamp (nanoseconds uptime) into system time, use that as the header stamp
                 long time_delta_millis = System.currentTimeMillis() - SystemClock.uptimeMillis();
                 this.imu.getHeader().setStamp(Time.fromMillis(time_delta_millis + event.timestamp / 1000000));
-                this.imu.getHeader().setFrameId("/imu");// TODO Make parameter
+                this.imu.getHeader().setFrameId("/android/imu");// TODO Make parameter
 
                 publisher.publish(this.imu);
 
