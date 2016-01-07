@@ -131,7 +131,7 @@ public class Config {
             nodeMainExecutor.execute(this.pub_fluid, nodeConfiguration1);
         }
         // Fluid node shutdown
-        else if(checkbox_fluid.isChecked() != old_fluid && !checkbox_fluid.isChecked()) {
+        else if(checkbox_fluid.isChecked() != old_fluid) {
             nodeMainExecutor.shutdownNodeMain(pub_fluid);
         }
 
@@ -144,7 +144,7 @@ public class Config {
             nodeMainExecutor.execute(this.pub_illuminance, nodeConfiguration2);
         }
         // Illuminance node shutdown
-        else if(checkbox_illuminance.isChecked() != old_illuminance && !checkbox_illuminance.isChecked()) {
+        else if(checkbox_illuminance.isChecked() != old_illuminance) {
             nodeMainExecutor.shutdownNodeMain(pub_illuminance);
         }
 
@@ -157,7 +157,7 @@ public class Config {
             nodeMainExecutor.execute(this.pub_imu, nodeConfiguration3);
         }
         // IMU node shutdown
-        else if(checkbox_imu.isChecked() != old_imu && !checkbox_imu.isChecked()) {
+        else if(checkbox_imu.isChecked() != old_imu) {
             nodeMainExecutor.shutdownNodeMain(pub_imu);
         }
 
@@ -170,7 +170,7 @@ public class Config {
             nodeMainExecutor.execute(this.pub_magnetic, nodeConfiguration4);
         }
         // Magnetic node shutdown
-        else if(checkbox_magnetic.isChecked() != old_magnetic && !checkbox_magnetic.isChecked()) {
+        else if(checkbox_magnetic.isChecked() != old_magnetic) {
             nodeMainExecutor.shutdownNodeMain(pub_magnetic);
         }
 
@@ -183,7 +183,7 @@ public class Config {
             nodeMainExecutor.execute(this.pub_navsat, nodeConfiguration5);
         }
         // Navigation satellite node shutdown
-        else if(checkbox_navsat.isChecked() != old_navsat && !checkbox_navsat.isChecked()) {
+        else if(checkbox_navsat.isChecked() != old_navsat) {
             nodeMainExecutor.shutdownNodeMain(pub_navsat);
         }
 
@@ -196,7 +196,7 @@ public class Config {
             nodeMainExecutor.execute(this.pub_temp, nodeConfiguration6);
         }
         // Temperature node shutdown
-        else if(checkbox_temp.isChecked() != old_temp && !checkbox_temp.isChecked()) {
+        else if(checkbox_temp.isChecked() != old_temp) {
             nodeMainExecutor.shutdownNodeMain(pub_temp);
         }
 
