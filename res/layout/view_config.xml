@@ -38,8 +38,8 @@
                     android:layout_width="fill_parent"
                     android:layout_height="fill_parent"
                     android:id="@+id/robot_name"
-                    android:hint="@string/robot_name_hint"
-                    android:inputType="text" />
+                    android:inputType="text"
+                    android:text="@string/robot_name_hint" />
 
             </LinearLayout>
 
@@ -204,7 +204,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="@string/button_config"
-        android:id="@+id/button"
+        android:id="@+id/config_submit"
         android:layout_gravity="center_horizontal"
         android:gravity="center"
         android:layout_marginTop="5dp" />

@@ -18,17 +18,12 @@ package org.ros.android.android_sensors_driver;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.hardware.Sensor;
-import android.hardware.SensorManager;
-import android.location.LocationManager;
 import android.net.Uri;
-import android.os.Build;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -38,15 +33,8 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 
-import org.ros.address.InetAddressFactory;
 import org.ros.android.RosActivity;
-import org.ros.android.android_sensors_driver.publishers.FluidPressurePublisher;
-import org.ros.android.android_sensors_driver.publishers.IlluminancePublisher;
-import org.ros.android.android_sensors_driver.publishers.ImuPublisher;
-import org.ros.android.android_sensors_driver.publishers.MagneticFieldPublisher;
-import org.ros.android.android_sensors_driver.publishers.NavSatFixPublisher;
-import org.ros.android.android_sensors_driver.publishers.TemperaturePublisher;
-import org.ros.node.NodeConfiguration;
+import org.ros.android.android_sensors_driver.utilities.Config;
 import org.ros.node.NodeMainExecutor;
 
 import java.net.URI;
@@ -55,26 +43,10 @@ import java.net.URI;
  * @author chadrockey@gmail.com (Chad Rockey)
  * @author axelfurlan@gmail.com (Axel Furlan)
  */
-
-
 public class MainActivity extends RosActivity {
-    protected final int MASTER_CHOOSER_REQUEST_CODE = 1;
-    protected final int currentApiVersion = android.os.Build.VERSION.SDK_INT;
-    private NodeMainExecutor nodeMainExecutor;
+    protected Config config;
+    protected Button button_config;
 
-    protected NavSatFixPublisher fix_pub;
-    protected ImuPublisher imu_pub;
-    protected MagneticFieldPublisher magnetic_field_pub;
-    protected FluidPressurePublisher fluid_pressure_pub;
-    protected IlluminancePublisher illuminance_pub;
-    protected TemperaturePublisher temperature_pub;
-    protected LocationManager mLocationManager;
-
-    protected SensorManager mSensorManager;
-    protected String robotName;
-
-    protected Button button1;
-    protected Button button2;
     private View mMainView;
     private View mConfigView;
     private int mShortAnimationDuration;
@@ -104,9 +76,8 @@ public class MainActivity extends RosActivity {
         // Retrieve and cache the system's default "short" animation time.
         mShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-        // Start the services we need
-        mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        mSensorManager = (SensorManager) this.getSystemService(SENSOR_SERVICE);
+        // Create our config
+        config = new Config(this);
 
         // Load our listeners on all the objects
         loadListeners();
@@ -117,25 +88,22 @@ public class MainActivity extends RosActivity {
      * Handles all the views inside the main_activity
      */
     public void loadListeners() {
-
-        final Context context = this;
-
-        button1 = (Button) findViewById(R.id.button1);
-
-        button1.setOnClickListener(new View.OnClickListener() {
-            @Override
+        // Config menu update button
+        button_config = (Button) findViewById(R.id.config_submit);
+        button_config.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
-//                Intent intent = new Intent(context, ConfigActivity.class);
-//                startActivity(intent);
-                System.out.println("HIT 4");
+                // Update the publishers
+                config.update_publishers();
+                // Toggle the views
+                toggleConfigView();
             }
         });
-
-
     }
 
     @Override
-    protected void onDestroy() { super.onDestroy(); }
+    protected void onDestroy() {
+        super.onDestroy();
+    }
 
     @Override
     protected void onPause() {
@@ -143,11 +111,17 @@ public class MainActivity extends RosActivity {
     }
 
     @Override
-    protected void onResume() { super.onResume(); }
+    protected void onResume() {
+        super.onResume();
+    }
 
+    /**
+     * When we have initialize pass our executor to the config
+     * The config needs this to launch nodes
+     */
     @Override
     protected void init(NodeMainExecutor nodeMainExecutor) {
-        this.nodeMainExecutor = nodeMainExecutor;
+        config.setNodeExecutor(nodeMainExecutor);
     }
 
     /**
@@ -253,70 +227,14 @@ public class MainActivity extends RosActivity {
         // to GONE as an optimization step (it won't participate in layout passes, etc.)
         hideView.animate()
             .alpha(0f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        hideView.setVisibility(View.GONE);
-                    }
-                });
+            .setDuration(mShortAnimationDuration)
+            .setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                hideView.setVisibility(View.GONE);
+                }
+            });
     }
 
-    /**
-     * This function creates all the event nodes that publish information
-     * Each sensor gets its own node, and is responsible for publishing its events
-     */
-    private void construct_publishers(NodeMainExecutor nodeMainExecutor) {
-        URI masterURI = getMasterUri();
 
-        int sensorDelay = 10000; // 10,000 us == 100 Hz for Android 3.1 and above
-        if (currentApiVersion <= android.os.Build.VERSION_CODES.HONEYCOMB) {
-            sensorDelay = SensorManager.SENSOR_DELAY_UI; // 16.7Hz for older devices.  They only support enum values, not the microsecond version.
-        }
-
-        int tempSensor;
-        if (currentApiVersion >= android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            tempSensor = Sensor.TYPE_AMBIENT_TEMPERATURE; // Use newer temperature if possible
-        }
-        else {
-            //noinspection deprecation
-            tempSensor = Sensor.TYPE_TEMPERATURE; // Older temperature
-        }
-
-        NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
-        nodeConfiguration.setMasterUri(masterURI);
-        nodeConfiguration.setNodeName("android_sensors_driver_magnetic_field");
-        this.magnetic_field_pub = new MagneticFieldPublisher(mSensorManager, sensorDelay, robotName);
-        nodeMainExecutor.execute(this.magnetic_field_pub, nodeConfiguration);
-
-        NodeConfiguration nodeConfiguration2 = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
-        nodeConfiguration2.setMasterUri(masterURI);
-        nodeConfiguration2.setNodeName("android_sensors_driver_nav_sat_fix");
-        this.fix_pub = new NavSatFixPublisher(mLocationManager, robotName);
-        nodeMainExecutor.execute(this.fix_pub, nodeConfiguration2);
-
-        NodeConfiguration nodeConfiguration3 = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
-        nodeConfiguration3.setMasterUri(masterURI);
-        nodeConfiguration3.setNodeName("android_sensors_driver_imu");
-        this.imu_pub = new ImuPublisher(mSensorManager, sensorDelay, robotName);
-        nodeMainExecutor.execute(this.imu_pub, nodeConfiguration3);
-
-        NodeConfiguration nodeConfiguration4 = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
-        nodeConfiguration4.setMasterUri(masterURI);
-        nodeConfiguration4.setNodeName("android_sensors_driver_pressure");
-        this.fluid_pressure_pub = new FluidPressurePublisher(mSensorManager, sensorDelay, robotName);
-        nodeMainExecutor.execute(this.fluid_pressure_pub, nodeConfiguration4);
-
-        NodeConfiguration nodeConfiguration5 = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
-        nodeConfiguration5.setMasterUri(masterURI);
-        nodeConfiguration5.setNodeName("android_sensors_driver_illuminance");
-        this.illuminance_pub = new IlluminancePublisher(mSensorManager, sensorDelay, robotName);
-        nodeMainExecutor.execute(this.illuminance_pub, nodeConfiguration5);
-
-        NodeConfiguration nodeConfiguration6 = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
-        nodeConfiguration6.setMasterUri(masterURI);
-        nodeConfiguration6.setNodeName("android_sensors_driver_temperature");
-        this.temperature_pub = new TemperaturePublisher(mSensorManager, sensorDelay, tempSensor, robotName);
-        nodeMainExecutor.execute(this.temperature_pub, nodeConfiguration6);
-    }
 }
