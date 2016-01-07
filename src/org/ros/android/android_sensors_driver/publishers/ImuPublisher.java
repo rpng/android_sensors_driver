@@ -77,7 +77,7 @@ public class ImuPublisher implements NodeMain {
 
     public void onStart(ConnectedNode node) {
         try {
-            this.publisher = node.newPublisher(robotName + "/android/imu", "sensor_msgs/Imu");
+            this.publisher = node.newPublisher("/android/" + robotName + "/imu", "sensor_msgs/Imu");
             // 	Determine if we have the various needed sensors
             boolean hasAccel = false;
             boolean hasGyro = false;

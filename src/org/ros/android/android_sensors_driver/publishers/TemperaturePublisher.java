@@ -81,7 +81,7 @@ public class TemperaturePublisher implements NodeMain {
             List<Sensor> mfList = this.sensorManager.getSensorList(sensorType);
 
             if (mfList.size() > 0) {
-                this.publisher = node.newPublisher(robotName + "/android/temperature", "sensor_msgs/Temperature");
+                this.publisher = node.newPublisher("/android/" + robotName + "/temperature", "sensor_msgs/Temperature");
                 this.sensorListener = new SensorListener(this.publisher);
                 this.tmpThread = new TemperatureThread(this.sensorManager, this.sensorListener);
                 this.tmpThread.start();

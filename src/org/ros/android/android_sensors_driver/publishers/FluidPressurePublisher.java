@@ -79,7 +79,7 @@ public class FluidPressurePublisher implements NodeMain {
             List<Sensor> mfList = this.sensorManager.getSensorList(Sensor.TYPE_PRESSURE);
 
             if (mfList.size() > 0) {
-                this.publisher = node.newPublisher(robotName + "/android/barometric_pressure", "sensor_msgs/FluidPressure");
+                this.publisher = node.newPublisher("/android/" + robotName + "/barometric_pressure", "sensor_msgs/FluidPressure");
                 this.sensorListener = new SensorListener(this.publisher);
                 this.fpThread = new FluidPressureThread(this.sensorManager, this.sensorListener);
                 this.fpThread.start();

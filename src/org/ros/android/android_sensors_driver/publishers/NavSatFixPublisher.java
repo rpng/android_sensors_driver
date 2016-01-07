@@ -67,7 +67,7 @@ public class NavSatFixPublisher implements NodeMain {
     //@Override
     public void onStart(ConnectedNode node) {
         try {
-            this.publisher = node.newPublisher(robotName + "/android/fix", "sensor_msgs/NavSatFix");
+            this.publisher = node.newPublisher("/android/" + robotName + "/fix", "sensor_msgs/NavSatFix");
             this.navSatFixListener = new NavSatListener(publisher);
             this.navSatThread = new NavSatThread(this.locationManager, this.navSatFixListener);
             this.navSatThread.start();

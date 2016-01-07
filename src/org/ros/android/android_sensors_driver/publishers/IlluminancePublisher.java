@@ -79,7 +79,7 @@ public class IlluminancePublisher implements NodeMain {
             List<Sensor> mfList = this.sensorManager.getSensorList(Sensor.TYPE_LIGHT);
 
             if (mfList.size() > 0) {
-                this.publisher = node.newPublisher(robotName + "/android/illuminance", "sensor_msgs/Illuminance");
+                this.publisher = node.newPublisher("/android/" + robotName + "/illuminance", "sensor_msgs/Illuminance");
                 this.sensorListener = new SensorListener(this.publisher);
                 this.ilThread = new IlluminanceThread(this.sensorManager, this.sensorListener);
                 this.ilThread.start();

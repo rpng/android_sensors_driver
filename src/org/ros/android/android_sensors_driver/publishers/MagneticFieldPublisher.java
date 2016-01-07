@@ -79,7 +79,7 @@ public class MagneticFieldPublisher implements NodeMain {
             List<Sensor> mfList = this.sensorManager.getSensorList(Sensor.TYPE_MAGNETIC_FIELD);
 
             if (mfList.size() > 0) {
-                this.publisher = node.newPublisher(robotName + "/android/magnetic_field", "sensor_msgs/MagneticField");
+                this.publisher = node.newPublisher("/android/" + robotName + "/magnetic_field", "sensor_msgs/MagneticField");
                 this.sensorListener = new SensorListener(this.publisher);
                 this.mfThread = new MagneticFieldThread(this.sensorManager, this.sensorListener);
                 this.mfThread.start();
