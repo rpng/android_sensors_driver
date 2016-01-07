@@ -58,6 +58,11 @@ public class MainActivity extends RosActivity {
         super("ROS Sensors Driver", "ROS Sensors Driver");
     }
 
+    /**
+     * Method called on app creation
+     * Load our views, and display our activity view
+     * Load our config and its values
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
