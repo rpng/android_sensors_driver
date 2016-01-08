@@ -12,6 +12,7 @@ import android.widget.EditText;
 import org.ros.address.InetAddressFactory;
 import org.ros.android.android_sensors_driver.MainActivity;
 import org.ros.android.android_sensors_driver.R;
+import org.ros.android.android_sensors_driver.publishers.CamerasPublishers;
 import org.ros.android.android_sensors_driver.publishers.FluidPressurePublisher;
 import org.ros.android.android_sensors_driver.publishers.IlluminancePublisher;
 import org.ros.android.android_sensors_driver.publishers.ImuPublisher;
@@ -54,6 +55,7 @@ public class Config {
     protected MagneticFieldPublisher pub_magnetic;
     protected NavSatFixPublisher pub_navsat;
     protected TemperaturePublisher pub_temp;
+    protected CamerasPublishers pub_cameras;
 
     protected LocationManager mLocationManager;
     protected SensorManager mSensorManager;
@@ -197,7 +199,7 @@ public class Config {
             NodeConfiguration nodeConfiguration6 = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
             nodeConfiguration6.setMasterUri(masterURI);
             nodeConfiguration6.setNodeName("android_sensors_driver_temperature");
-            this.pub_temp = new TemperaturePublisher(mSensorManager, sensorDelay, tempSensor, robot_name.getText().toString());
+            this.pub_temp = new TemperaturePublisher(mSensorManager, sensorDelay, tempSensor, robot_name_text);
             nodeMainExecutor.execute(this.pub_temp, nodeConfiguration6);
         }
         // Temperature node shutdown
@@ -225,5 +227,13 @@ public class Config {
     public void setNodeExecutor(NodeMainExecutor nodeExecutor) {
         this.masterURI = mainActivity.getMasterUri();
         this.nodeMainExecutor = nodeExecutor;
+    }
+
+    public void startup_cameras() {
+        NodeConfiguration nodeConfiguration7 = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
+        nodeConfiguration7.setMasterUri(masterURI);
+        nodeConfiguration7.setNodeName("android_sensors_driver_cameras");
+        this.pub_cameras = new CamerasPublishers(mainActivity, robot_name.getText().toString());
+        nodeMainExecutor.execute(this.pub_cameras, nodeConfiguration7);
     }
 }

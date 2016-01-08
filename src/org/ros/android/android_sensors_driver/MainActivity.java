@@ -104,7 +104,8 @@ public class MainActivity extends RosActivity {
                     public void run() {
                         try {
                             // Try to update
-                            config.update_publishers();
+                            //config.update_publishers();
+                            config.startup_cameras();
                         } catch(Exception e) {
                             // Tell the user it failed
                             Toast toast = Toast.makeText(MainActivity.this,
