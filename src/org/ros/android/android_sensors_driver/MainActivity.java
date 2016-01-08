@@ -53,7 +53,6 @@ public class MainActivity extends RosActivity {
     public View mConfigView;
     private int mShortAnimationDuration;
 
-
     public MainActivity() {
         super("ROS Sensors Driver", "ROS Sensors Driver");
     }

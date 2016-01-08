@@ -5,11 +5,13 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import org.jboss.netty.buffer.ChannelBufferOutputStream;
+import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
+import org.ros.android.android_sensors_driver.R;
 import org.ros.internal.message.MessageBuffers;
 import org.ros.message.Time;
 import org.ros.namespace.NameResolver;
@@ -18,6 +20,7 @@ import org.ros.node.topic.Publisher;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.util.Log;
 import android.view.SurfaceHolder;
 

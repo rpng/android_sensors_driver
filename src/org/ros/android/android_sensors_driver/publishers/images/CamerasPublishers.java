@@ -1,4 +1,4 @@
-package org.ros.android.android_sensors_driver.publishers;
+package org.ros.android.android_sensors_driver.publishers.images;
 
 import android.graphics.ImageFormat;
 import android.hardware.Camera;

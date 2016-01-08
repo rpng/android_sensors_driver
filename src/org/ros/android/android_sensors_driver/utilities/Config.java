@@ -222,12 +222,16 @@ public class Config {
 
         // Camera node startup, restart all nodes when we change cameras
         if(hasCamerasChanged()) {
+            // Ensure all cameras are shutdown
+            nodeMainExecutor.shutdownNodeMain(pub_cameras);
+            // List of enabled cameras
             ArrayList<Integer> cameras = new ArrayList<>();
             // Find all cameras that have been enabled
             for(int i=0; i<camera_list.getChildCount(); i++) {
                 if(((CheckBox)camera_list.getChildAt(i)).isChecked())
                     cameras.add(i);
             }
+            // Create the node
             NodeConfiguration nodeConfiguration7 = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
             nodeConfiguration7.setMasterUri(masterURI);
             nodeConfiguration7.setNodeName("android_sensors_driver_cameras");

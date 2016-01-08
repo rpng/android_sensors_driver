@@ -30,9 +30,6 @@
 package org.ros.android.android_sensors_driver.publishers.images2;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -41,7 +38,6 @@ import android.widget.Toast;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
-import org.ros.android.android_sensors_driver.MainActivity;
 import org.ros.android.android_sensors_driver.R;
 import org.ros.node.ConnectedNode;
 import org.ros.namespace.GraphName;
@@ -65,10 +61,16 @@ public class CameraPublisher implements NodeMain
     private Activity mainActivity;
     private ConnectedNode node = null;
 
+    LinearLayout layout;
+    LinearLayout.LayoutParams params;
+
     public CameraPublisher(Activity mainAct, ArrayList<Integer> camera_ids, String robotName) {
         this.mainActivity = mainAct;
         this.camera_ids = camera_ids;
         this.robotName = robotName;
+        // Layout variables
+        layout = (LinearLayout) mainActivity.findViewById(R.id.view_main);
+        params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
     }
 
     public GraphName getDefaultNodeName() {
@@ -80,10 +82,26 @@ public class CameraPublisher implements NodeMain
         this.mViews = new ArrayList<>();
         this.mViewList = new ArrayList<>();
         // See if we can load opencv
-        if (!OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_2, this.mainActivity, mOpenCVCallBack)) {
-            Toast toast = Toast.makeText(mainActivity, "Cannot connect to OpenCV Manager", Toast.LENGTH_SHORT);
-            toast.show();
+        try {
+            if (!OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_2, this.mainActivity, mOpenCVCallBack)) {
+                Toast toast = Toast.makeText(mainActivity, "Cannot connect to OpenCV Manager", Toast.LENGTH_SHORT);
+                toast.show();
+                System.out.println("Cannot connect to OpenCV Manager");
+                mainActivity.finish();
+            }
+        } catch(Exception e) {
+            // Debug
             System.out.println("Cannot connect to OpenCV Manager");
+            e.printStackTrace();
+            // Toast to the user
+            mainActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast toast = Toast.makeText(mainActivity, "Cannot connect to OpenCV Manager", Toast.LENGTH_SHORT);
+                    toast.show();
+                    mainActivity.finish();
+                }
+            });
         }
     }
 
@@ -108,10 +126,12 @@ public class CameraPublisher implements NodeMain
         }
     }
 
-    public void releaseCamera() {
+    public void releaseCameras() {
+        // Release the cameras
         for(int i=0;i<mViews.size(); i++){
-            if (null != mViews.get(i))
+            if (null != mViews.get(i)) {
                 mViews.get(i).releaseCamera();
+            }
         }
     }
 
@@ -120,6 +140,16 @@ public class CameraPublisher implements NodeMain
 
     @Override
     public void onShutdown(Node arg0) {
+        // Release
+        releaseCameras();
+        // Have to run in the UI thread, clear all the views
+        mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                for(int i=0; i<mViewList.size(); i++)
+                    layout.removeView(mViewList.get(i));
+            }
+        });
     }
 
     @Override
@@ -145,30 +175,34 @@ public class CameraPublisher implements NodeMain
                 super.onManagerConnected(status);
                 return;
             }
-            // Create our layout we will put the views in
-            LinearLayout layout = new LinearLayout(mainActivity.getBaseContext());
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
             // Create and set views
             for(Integer camera_id: camera_ids) {
                 // Create a new camera node
-                Sample2View temp = new Sample2View(mainActivity.findViewById(R.id.view_main).getContext(), node, camera_id, robotName);
+                Sample2View temp = new Sample2View(mainActivity.getBaseContext(), node, camera_id, robotName);
                 mViews.add(temp);
-                // Check to see if we opened successfully
-                if (!temp.openCamera()) {
-                    TextView textView = new TextView(mainActivity.findViewById(R.id.view_main).getContext());
-                    textView.setTextSize(40);
-                    textView.setText("Camera " + (camera_id+1));
-                    textView.setGravity(Gravity.CENTER);
-                    layout.addView(textView, params);
-                    mViewList.add(textView);
-                }
-                // If we did, ensure we have the view added
-                else {
-                    layout.addView(temp, params);
-                    mViewList.add(temp);
-                }
+                mViewList.add(temp);
             }
-            mainActivity.addContentView(layout, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+            // Add the camera views
+            mainActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    for(int i=0; i<mViews.size(); i++) {
+                        // Check to see if we opened successfully
+                        if (!mViews.get(i).openCamera()) {
+                            TextView textView = new TextView(mainActivity.getBaseContext());
+                            textView.setTextSize(40);
+                            textView.setText("Camera " + (camera_ids.get(i) + 1));
+                            textView.setGravity(Gravity.CENTER);
+                            layout.addView(textView, params);
+                            mViewList.add(textView);
+                        }
+                        // If we did, ensure we have the view added
+                        else {
+                            layout.addView(mViews.get(i), params);
+                        }
+                    }
+                }
+            });
         }
     };
 

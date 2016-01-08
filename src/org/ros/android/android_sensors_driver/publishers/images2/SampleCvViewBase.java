@@ -9,6 +9,7 @@ import org.opencv.highgui.Highgui;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
@@ -105,6 +106,9 @@ public abstract class SampleCvViewBase extends SurfaceView implements SurfaceHol
         while (true) {
             Bitmap bmp = null;
 
+            if(!mHolder.getSurface().isValid())
+                continue;
+
             synchronized (this) {
                 // If we do not have a camera, skip
                 if (mCamera == null)
@@ -117,15 +121,20 @@ public abstract class SampleCvViewBase extends SurfaceView implements SurfaceHol
                 bmp = processFrame(mCamera);
             }
 
+
+
+//            Canvas canvas = mHolder.lockCanvas();
+//            mHolder.unlockCanvasAndPost(canvas);
+//            bmp.recycle();
             // TODO: If we have a bitmap then display it for the user
             // TODO: This causes this thread to lag, deal with this later
             if (bmp != null) {
                 Canvas canvas = mHolder.lockCanvas();
                 if (canvas != null) {
-                    canvas.drawBitmap(bmp, (canvas.getWidth() - bmp.getWidth()) / 2, (canvas.getHeight() - bmp.getHeight()) / 2, null);
+                    canvas.drawBitmap(bmp, null, new Rect(0, 0, getWidth(), getHeight()), null);
                     mHolder.unlockCanvasAndPost(canvas);
                 }
-                bmp.recycle();
+                //bmp.recycle();
             }
         }
     }
