@@ -248,7 +248,7 @@ public class Config {
             try {
                 Camera temp = Camera.open(i);
                 Camera.Parameters params = temp.getParameters();
-                cameras.put(i,"Camera "+i+" ("+params.getPreviewSize().width+"x"+params.getPreviewSize().height+")  "+params.getHorizontalViewAngle()+"deg");
+                cameras.put(i,"Camera "+i+" ("+params.getPreviewSize().width+"x"+params.getPreviewSize().height+")  "+params.getHorizontalViewAngle()+"\u00B0");
                 temp.release();
             } catch(Exception e) {
                 error = true;
