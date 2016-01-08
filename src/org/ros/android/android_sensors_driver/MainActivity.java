@@ -104,8 +104,7 @@ public class MainActivity extends RosActivity {
                     public void run() {
                         try {
                             // Try to update
-                            //config.update_publishers();
-                            config.startup_cameras();
+                            config.update_publishers();
                         } catch(Exception e) {
                             // Tell the user it failed
                             Toast toast = Toast.makeText(MainActivity.this,
@@ -230,6 +229,7 @@ public class MainActivity extends RosActivity {
      * http://developer.android.com/training/animation/crossfade.html#views
      */
     private void toggleConfigView() {
+        System.out.println("HIT 2");
         // Decide which view to hide and which to show.
         boolean state = mConfigView.getVisibility() != View.VISIBLE;
         final View showView = state ? mConfigView : mMainView;

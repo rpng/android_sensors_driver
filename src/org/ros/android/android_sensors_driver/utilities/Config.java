@@ -6,7 +6,6 @@ import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.location.LocationManager;
-import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -16,7 +15,6 @@ import android.widget.Toast;
 import org.ros.address.InetAddressFactory;
 import org.ros.android.android_sensors_driver.MainActivity;
 import org.ros.android.android_sensors_driver.R;
-import org.ros.android.android_sensors_driver.publishers.CamerasPublishers;
 import org.ros.android.android_sensors_driver.publishers.FluidPressurePublisher;
 import org.ros.android.android_sensors_driver.publishers.IlluminancePublisher;
 import org.ros.android.android_sensors_driver.publishers.ImuPublisher;
@@ -29,8 +27,6 @@ import org.ros.node.NodeMainExecutor;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Config {
 
@@ -48,6 +44,7 @@ public class Config {
     protected CheckBox checkbox_navsat;
     protected CheckBox checkbox_temp;
     protected Button button_config;
+    protected LinearLayout camera_list;
 
     protected String old_robot_name;
     protected boolean old_fluid;
@@ -56,6 +53,7 @@ public class Config {
     protected boolean old_magnetic;
     protected boolean old_navsat;
     protected boolean old_temp;
+    protected ArrayList<Boolean> old_camera_list;
 
 
     protected FluidPressurePublisher pub_fluid;
@@ -64,7 +62,7 @@ public class Config {
     protected MagneticFieldPublisher pub_magnetic;
     protected NavSatFixPublisher pub_navsat;
     protected TemperaturePublisher pub_temp;
-    protected CamerasPublishers pub_cameras;
+    protected CameraPublisher pub_cameras;
 
     protected LocationManager mLocationManager;
     protected SensorManager mSensorManager;
@@ -87,6 +85,7 @@ public class Config {
 
         // Load old variables, booleans default to false
         old_robot_name = robot_name.getText().toString();
+        old_camera_list = new ArrayList<>();
 
         // Load our camera listing in
         load_cameras();
@@ -133,12 +132,14 @@ public class Config {
             nodeMainExecutor.shutdownNodeMain(pub_magnetic);
             nodeMainExecutor.shutdownNodeMain(pub_navsat);
             nodeMainExecutor.shutdownNodeMain(pub_temp);
+            nodeMainExecutor.shutdownNodeMain(pub_cameras);
             old_fluid = false;
             old_illuminance = false;
             old_imu = false;
             old_magnetic = false;
             old_navsat = false;
             old_temp = false;
+            old_camera_list = new ArrayList<>();
         }
 
         // Fluid node startup
@@ -219,6 +220,21 @@ public class Config {
             nodeMainExecutor.shutdownNodeMain(pub_temp);
         }
 
+        // Camera node startup, restart all nodes when we change cameras
+        if(hasCamerasChanged()) {
+            ArrayList<Integer> cameras = new ArrayList<>();
+            // Find all cameras that have been enabled
+            for(int i=0; i<camera_list.getChildCount(); i++) {
+                if(((CheckBox)camera_list.getChildAt(i)).isChecked())
+                    cameras.add(i);
+            }
+            NodeConfiguration nodeConfiguration7 = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
+            nodeConfiguration7.setMasterUri(masterURI);
+            nodeConfiguration7.setNodeName("android_sensors_driver_cameras");
+            pub_cameras = new CameraPublisher(mainActivity, cameras, robot_name_text);
+            nodeMainExecutor.execute(pub_cameras, nodeConfiguration7);
+        }
+
         // Finally, update our old states
         old_robot_name = robot_name.getText().toString();
         old_fluid = checkbox_fluid.isChecked();
@@ -227,6 +243,11 @@ public class Config {
         old_magnetic = checkbox_magnetic.isChecked();
         old_navsat = checkbox_navsat.isChecked();
         old_temp = checkbox_temp.isChecked();
+
+        // Update camera params
+        for(int i=0; i<camera_list.getChildCount(); i++) {
+            old_camera_list.add(i, ((CheckBox)camera_list.getChildAt(i)).isChecked());
+        }
 
         // Re-enable button
         button_config.setEnabled(true);
@@ -241,6 +262,10 @@ public class Config {
         this.nodeMainExecutor = nodeExecutor;
     }
 
+    /**
+     * This loops through all cameras on the device
+     * A checkbox with the camera stats is then added to the config screen
+     */
     public void load_cameras() {
         // Init
         cameras = new ArrayList<>();
@@ -267,7 +292,7 @@ public class Config {
             });
         }
         // Add the cameras we have to the view
-        LinearLayout camera_list = (LinearLayout) mainActivity.findViewById(R.id.camera_list);
+        camera_list = (LinearLayout) mainActivity.findViewById(R.id.camera_list);
         for (String entry : cameras) {
             CheckBox checkbox = new CheckBox(mainActivity);
             checkbox.setText(entry);
@@ -282,13 +307,15 @@ public class Config {
         }
     }
 
-    public void startup_cameras() {
-        NodeConfiguration nodeConfiguration7 = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
-        nodeConfiguration7.setMasterUri(masterURI);
-        nodeConfiguration7.setNodeName("android_sensors_driver_cameras");
-        //this.pub_cameras = new CamerasPublishers(mainActivity, robot_name.getText().toString());
-        int[] camera_ids = new int[]{0,1,2};
-        CameraPublisher pub_cameras = new CameraPublisher(mainActivity, camera_ids, robot_name.getText().toString());;
-        nodeMainExecutor.execute(pub_cameras, nodeConfiguration7);
+    public boolean hasCamerasChanged() {
+        // Check to see if we have a new camera list
+        if(old_camera_list.isEmpty())
+            return true;
+        // Loop through current ones
+        for(int i=0; i<camera_list.getChildCount(); i++) {
+            if(((CheckBox)camera_list.getChildAt(i)).isChecked()!=old_camera_list.get(i))
+                return true;
+        }
+        return false;
     }
 }

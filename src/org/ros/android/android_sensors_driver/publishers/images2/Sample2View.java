@@ -55,9 +55,9 @@ class Sample2View extends SampleCvViewBase {
         this.connectedNode = connectedNode;
         this.camera_id = camera_id;
         // Create the publishers
-        this.imagePublisher = connectedNode.newPublisher("/android/"+robotName+"/camera_"+camera_id+"/image/compressed", sensor_msgs.CompressedImage._TYPE);
-        this.cameraInfoPublisher = connectedNode.newPublisher("/android/"+robotName+"/camera_"+camera_id+"/camera_info", sensor_msgs.CameraInfo._TYPE);
-        this.rawImagePublisher = connectedNode.newPublisher("/android/"+robotName+"/camera_"+camera_id+"/image/raw", sensor_msgs.Image._TYPE);
+        this.imagePublisher = connectedNode.newPublisher("/android/"+robotName+"/camera_"+(camera_id+1)+"/image/compressed", sensor_msgs.CompressedImage._TYPE);
+        this.cameraInfoPublisher = connectedNode.newPublisher("/android/"+robotName+"/camera_"+(camera_id+1)+"/camera_info", sensor_msgs.CameraInfo._TYPE);
+        this.rawImagePublisher = connectedNode.newPublisher("/android/"+robotName+"/camera_"+(camera_id+1)+"/image/raw", sensor_msgs.Image._TYPE);
         // Our image variables
         stream = new ChannelBufferOutputStream(MessageBuffers.dynamicBuffer());
         bmp = null;

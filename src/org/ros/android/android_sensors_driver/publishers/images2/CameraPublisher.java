@@ -42,6 +42,7 @@ import android.widget.Toast;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.ros.android.android_sensors_driver.MainActivity;
+import org.ros.android.android_sensors_driver.R;
 import org.ros.node.ConnectedNode;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
@@ -59,12 +60,12 @@ public class CameraPublisher implements NodeMain
 {
     private ArrayList<Sample2View> mViews;
     private ArrayList<View> mViewList;
-    private int[] camera_ids;
+    private ArrayList<Integer> camera_ids;
     private String robotName;
     private Activity mainActivity;
     private ConnectedNode node = null;
 
-    public CameraPublisher(Activity mainAct, int[] camera_ids, String robotName) {
+    public CameraPublisher(Activity mainAct, ArrayList<Integer> camera_ids, String robotName) {
         this.mainActivity = mainAct;
         this.camera_ids = camera_ids;
         this.robotName = robotName;
@@ -94,7 +95,7 @@ public class CameraPublisher implements NodeMain
             if ((null != mViews.get(i)) && !mViews.get(i).openCamera()) {
                 TextView textView = new TextView(mainActivity.getBaseContext());
                 textView.setTextSize(40);
-                textView.setText("Camera " + (camera_ids[i]+1));
+                textView.setText("Camera " + (camera_ids.get(i)+1));
                 textView.setGravity(Gravity.CENTER);
                 //View temp = mViewList.get(i);
                 //temp = textView;
@@ -147,17 +148,16 @@ public class CameraPublisher implements NodeMain
             // Create our layout we will put the views in
             LinearLayout layout = new LinearLayout(mainActivity.getBaseContext());
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
-            mainActivity.addContentView(layout, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
             // Create and set views
-            for(int i=0;i<camera_ids.length; i++) {
+            for(Integer camera_id: camera_ids) {
                 // Create a new camera node
-                Sample2View temp = new Sample2View(mainActivity, node, camera_ids[i], robotName);
+                Sample2View temp = new Sample2View(mainActivity.findViewById(R.id.view_main).getContext(), node, camera_id, robotName);
                 mViews.add(temp);
                 // Check to see if we opened successfully
                 if (!temp.openCamera()) {
-                    TextView textView = new TextView(mainActivity.getBaseContext());
+                    TextView textView = new TextView(mainActivity.findViewById(R.id.view_main).getContext());
                     textView.setTextSize(40);
-                    textView.setText("Camera " + (camera_ids[i]+1));
+                    textView.setText("Camera " + (camera_id+1));
                     textView.setGravity(Gravity.CENTER);
                     layout.addView(textView, params);
                     mViewList.add(textView);
@@ -168,6 +168,7 @@ public class CameraPublisher implements NodeMain
                     mViewList.add(temp);
                 }
             }
+            mainActivity.addContentView(layout, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
         }
     };
 
