@@ -2,12 +2,16 @@ package org.ros.android.android_sensors_driver.utilities;
 
 
 import android.content.Context;
+import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.location.LocationManager;
+import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import org.ros.address.InetAddressFactory;
 import org.ros.android.android_sensors_driver.MainActivity;
@@ -23,6 +27,8 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Config {
 
@@ -30,6 +36,7 @@ public class Config {
     protected final int currentApiVersion = android.os.Build.VERSION.SDK_INT;
     protected URI masterURI;
     protected NodeMainExecutor nodeMainExecutor;
+    protected HashMap<Integer, String> cameras;
 
     protected EditText robot_name;
     protected CheckBox checkbox_fluid;
@@ -78,6 +85,9 @@ public class Config {
 
         // Load old variables, booleans default to false
         old_robot_name = robot_name.getText().toString();
+
+        // Load our camera listing in
+        load_cameras();
 
         // Start the services we need
         mLocationManager = (LocationManager) mainActivity.getSystemService(Context.LOCATION_SERVICE);
@@ -227,6 +237,47 @@ public class Config {
     public void setNodeExecutor(NodeMainExecutor nodeExecutor) {
         this.masterURI = mainActivity.getMasterUri();
         this.nodeMainExecutor = nodeExecutor;
+    }
+
+    public void load_cameras() {
+        // Init
+        cameras = new HashMap<>();
+        boolean error = false;
+        // Go through all cameras and get stats
+        for(int i=0; i< Camera.getNumberOfCameras(); i++) {
+            try {
+                Camera temp = Camera.open(i);
+                Camera.Parameters params = temp.getParameters();
+                cameras.put(i,"Camera "+i+" ("+params.getPreviewSize().width+"x"+params.getPreviewSize().height+")  "+params.getHorizontalViewAngle()+"deg");
+                temp.release();
+            } catch(Exception e) {
+                error = true;
+            }
+        }
+        // If we had an error do a Toast
+        if(error) {
+            mainActivity.runOnUiThread(new Runnable() {
+                public void run() {
+                    Toast toast = Toast.makeText(mainActivity,
+                            "Unable to list all cameras", Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+            });
+        }
+        // Add the cameras we have to the view
+        LinearLayout camera_list = (LinearLayout) mainActivity.findViewById(R.id.camera_list);
+        for (Map.Entry<Integer, String> entry : cameras.entrySet()) {
+            CheckBox checkbox = new CheckBox(mainActivity);
+            checkbox.setText(entry.getValue());
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            params.setMargins(5,5,5,5);
+            checkbox.setLayoutParams(params);
+            checkbox.setTextAppearance(mainActivity, android.R.style.TextAppearance_Holo_Medium);
+            camera_list.addView(checkbox);
+        }
     }
 
     public void startup_cameras() {

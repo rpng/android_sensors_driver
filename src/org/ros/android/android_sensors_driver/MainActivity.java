@@ -49,8 +49,8 @@ public class MainActivity extends RosActivity {
     protected Config config;
     protected Button button_config;
 
-    private View mMainView;
-    private View mConfigView;
+    public View mMainView;
+    public View mConfigView;
     private int mShortAnimationDuration;
 
 
@@ -104,8 +104,8 @@ public class MainActivity extends RosActivity {
                     public void run() {
                         try {
                             // Try to update
-                            //config.update_publishers();
-                            config.startup_cameras();
+                            config.update_publishers();
+                            //config.startup_cameras();
                         } catch(Exception e) {
                             // Tell the user it failed
                             Toast toast = Toast.makeText(MainActivity.this,

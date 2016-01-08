@@ -151,51 +151,11 @@
                 android:background="?android:attr/listDivider" />
 
             <LinearLayout
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" >
+                android:layout_height="match_parent"
+                android:id="@+id/camera_list">
 
-                <CheckBox
-                    android:layout_width="wrap_content"
-                    android:layout_height="fill_parent"
-                    android:text="Camera 1 (320x420) 27.00deg"
-                    android:id="@+id/checkbox_cam1"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:layout_margin="5dp"
-                    android:checked="false"
-                    android:enabled="false" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" >
-
-                <CheckBox
-                    android:layout_width="wrap_content"
-                    android:layout_height="fill_parent"
-                    android:text="Camera 2 (1200x600) 135.35deg"
-                    android:id="@+id/checkbox_cam2"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:layout_margin="5dp"
-                    android:checked="false"
-                    android:enabled="false" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" >
-
-                <CheckBox
-                    android:layout_width="wrap_content"
-                    android:layout_height="fill_parent"
-                    android:text="Camera 3 (400x230) 95.03deg"
-                    android:id="@+id/checkbox_cam3"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:layout_margin="5dp"
-                    android:checked="false"
-                    android:enabled="false" />
             </LinearLayout>
 
         </LinearLayout>
