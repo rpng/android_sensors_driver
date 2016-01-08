@@ -8,7 +8,6 @@ bin
 build
 build.xml
 gen
-libs
 lint.xml
 local.properties
 proguard-project.txt

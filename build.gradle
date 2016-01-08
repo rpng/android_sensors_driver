@@ -15,8 +15,9 @@
  */
 
 dependencies {
-    compile('org.ros.rosjava_core:rosjava:[0.1,0.2)')
-    compile('org.ros.android_core:android_honeycomb_mr2:0.1.+')
+    compile 'org.ros.rosjava_core:rosjava:[0.1,0.2)'
+    compile 'org.ros.android_core:android_honeycomb_mr2:0.1.+'
+    compile files('libs/opencv_library-2.4.3.jar')
 }
 
 apply plugin: 'com.android.application'

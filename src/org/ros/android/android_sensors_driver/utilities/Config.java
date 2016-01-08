@@ -23,10 +23,12 @@ import org.ros.android.android_sensors_driver.publishers.ImuPublisher;
 import org.ros.android.android_sensors_driver.publishers.MagneticFieldPublisher;
 import org.ros.android.android_sensors_driver.publishers.NavSatFixPublisher;
 import org.ros.android.android_sensors_driver.publishers.TemperaturePublisher;
+import org.ros.android.android_sensors_driver.publishers.images2.CameraPublisher;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,7 +38,7 @@ public class Config {
     protected final int currentApiVersion = android.os.Build.VERSION.SDK_INT;
     protected URI masterURI;
     protected NodeMainExecutor nodeMainExecutor;
-    protected HashMap<Integer, String> cameras;
+    protected ArrayList<String> cameras;
 
     protected EditText robot_name;
     protected CheckBox checkbox_fluid;
@@ -241,14 +243,14 @@ public class Config {
 
     public void load_cameras() {
         // Init
-        cameras = new HashMap<>();
+        cameras = new ArrayList<>();
         boolean error = false;
         // Go through all cameras and get stats
         for(int i=0; i< Camera.getNumberOfCameras(); i++) {
             try {
                 Camera temp = Camera.open(i);
                 Camera.Parameters params = temp.getParameters();
-                cameras.put(i,"Camera "+i+" ("+params.getPreviewSize().width+"x"+params.getPreviewSize().height+")  "+params.getHorizontalViewAngle()+"\u00B0");
+                cameras.add("Camera " + (i+1) + " (" + params.getPreviewSize().width + "x" + params.getPreviewSize().height + ")  " + params.getHorizontalViewAngle() + "\u00B0");
                 temp.release();
             } catch(Exception e) {
                 error = true;
@@ -266,9 +268,9 @@ public class Config {
         }
         // Add the cameras we have to the view
         LinearLayout camera_list = (LinearLayout) mainActivity.findViewById(R.id.camera_list);
-        for (Map.Entry<Integer, String> entry : cameras.entrySet()) {
+        for (String entry : cameras) {
             CheckBox checkbox = new CheckBox(mainActivity);
-            checkbox.setText(entry.getValue());
+            checkbox.setText(entry);
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
@@ -284,7 +286,9 @@ public class Config {
         NodeConfiguration nodeConfiguration7 = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
         nodeConfiguration7.setMasterUri(masterURI);
         nodeConfiguration7.setNodeName("android_sensors_driver_cameras");
-        this.pub_cameras = new CamerasPublishers(mainActivity, robot_name.getText().toString());
-        nodeMainExecutor.execute(this.pub_cameras, nodeConfiguration7);
+        //this.pub_cameras = new CamerasPublishers(mainActivity, robot_name.getText().toString());
+        int[] camera_ids = new int[]{0,1,2};
+        CameraPublisher pub_cameras = new CameraPublisher(mainActivity, camera_ids, robot_name.getText().toString());;
+        nodeMainExecutor.execute(pub_cameras, nodeConfiguration7);
     }
 }
