@@ -134,8 +134,8 @@ class Sample2View extends SampleCvViewBase {
         	cameraInfo = cameraInfoPublisher.newMessage();
             cameraInfo.getHeader().setFrameId("camera");
             cameraInfo.getHeader().setStamp(currentTime);
-            cameraInfo.setWidth(640);
-            cameraInfo.setHeight(480);
+            cameraInfo.setWidth(mRgba.cols());
+            cameraInfo.setHeight(mRgba.rows());
             cameraInfoPublisher.publish(cameraInfo);
             measureTime[3] = connectedNode.getCurrentTime();
             
@@ -208,46 +208,10 @@ class Sample2View extends SampleCvViewBase {
 	            Log.i(TAG,"Raw image 6");
             }
             */
-
-            newTime = connectedNode.getCurrentTime();
-            stats[9][counter] = (newTime.subtract(oldTime)).nsecs/1000000.0;
-            oldTime = newTime;
-
-        	for(int i=1;i<9;i++)
-        	{
-        		stats[i][counter] = (measureTime[i].subtract(measureTime[i-1])).nsecs/1000000.0;
-        	}
-        	
-        	
-        	stats[0][counter] = measureTime[8].subtract(measureTime[0]).nsecs/1000000.0;
-        	
-        	counter++;
-        	if(counter == numSamples)
-        	{
-        		double[] sts = new double[10];
-        		Arrays.fill(sts, 0.0);
-        		
-        		for(int i=0;i<10;i++)
-            	{
-        			for(int j=0;j<numSamples;j++)
-        				sts[i] += stats[i][j];
-        			
-        			sts[i] /= (double)numSamples;
-        			
-        			//if(MainActivity.imageCompression >= MainActivity.IMAGE_TRANSPORT_COMPRESSION_PNG)
-        				//Log.i(TAG,String.format("Mean time for %s:\t\t%4.2fms", compDescStrings[i], sts[i]));
-        			//else
-        			//	Log.i(TAG,String.format("Mean time for %s:\t\t%4.2fms", rawDescStrings[i], sts[i]));
-            	}
-        		//Log.i(TAG,"\n\n");
-        		counter = 0;
-        	}
-        	
         	
         	
             return bmp;
-        } catch(Exception e)
-        {
+        } catch(Exception e) {
             System.err.println("Frame conversion and publishing throws an exception: " + e.getMessage());
             bmp.recycle();
             return null;
@@ -257,7 +221,6 @@ class Sample2View extends SampleCvViewBase {
     @Override
     public void run() {
         super.run();
-
         synchronized (this) {
             // Explicitly deallocate Mats
             if (mRgba != null)

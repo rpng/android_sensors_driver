@@ -6,10 +6,13 @@ import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.location.LocationManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.ros.address.InetAddressFactory;
@@ -22,6 +25,7 @@ import org.ros.android.android_sensors_driver.publishers.MagneticFieldPublisher;
 import org.ros.android.android_sensors_driver.publishers.NavSatFixPublisher;
 import org.ros.android.android_sensors_driver.publishers.TemperaturePublisher;
 import org.ros.android.android_sensors_driver.publishers.images2.CameraPublisher;
+import org.ros.android.android_sensors_driver.publishers.images2.ImageParams;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 
@@ -298,16 +302,75 @@ public class Config {
         // Add the cameras we have to the view
         camera_list = (LinearLayout) mainActivity.findViewById(R.id.camera_list);
         for (String entry : cameras) {
+            // Camera checkbox
             CheckBox checkbox = new CheckBox(mainActivity);
             checkbox.setText(entry);
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams params_1 = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
             );
-            params.setMargins(5,5,5,5);
-            checkbox.setLayoutParams(params);
+            params_1.setMargins(5, 5, 5, 5);
+            checkbox.setLayoutParams(params_1);
             checkbox.setTextAppearance(mainActivity, android.R.style.TextAppearance_Holo_Medium);
-            camera_list.addView(checkbox);
+            // Camera view mode text
+            TextView text_viewmode = new TextView(mainActivity);
+            text_viewmode.setText("View Mode: ");
+            LinearLayout.LayoutParams params_2 = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            params_2.setMargins(70, 0, 0, 0);
+            text_viewmode.setLayoutParams(params_2);
+            text_viewmode.setTextAppearance(mainActivity, android.R.style.TextAppearance_Holo_Medium);
+            // Camera view mode dropdown
+            Spinner dropdown_viewmode = new Spinner(mainActivity);
+            ImageParams.ViewMode[] items_viewmode = new ImageParams.ViewMode[] {
+                    ImageParams.ViewMode.GRAY,
+                    ImageParams.ViewMode.RGBA,
+                    ImageParams.ViewMode.CANNY
+            };
+            ArrayAdapter<ImageParams.ViewMode> adapter_viewmode =
+                    new ArrayAdapter<ImageParams.ViewMode>(mainActivity, android.R.layout.simple_spinner_item, items_viewmode);
+            dropdown_viewmode.setAdapter(adapter_viewmode);
+            // Camera compression text
+            TextView text_compression = new TextView(mainActivity);
+            text_compression.setText("Compression: ");
+            text_compression.setLayoutParams(params_2);
+            text_compression.setTextAppearance(mainActivity, android.R.style.TextAppearance_Holo_Medium);
+            // Camera compression level dropdown
+            Spinner dropdown_compresion = new Spinner(mainActivity);
+            ImageParams.CompressionLevel[] items_compression = new ImageParams.CompressionLevel[] {
+                    ImageParams.CompressionLevel.VERY_HIGH,
+                    ImageParams.CompressionLevel.HIGH,
+                    ImageParams.CompressionLevel.MEDIUM,
+                    ImageParams.CompressionLevel.LOW,
+                    ImageParams.CompressionLevel.NONE,
+            };
+            ArrayAdapter<ImageParams.CompressionLevel> adapter_compression =
+                    new ArrayAdapter<ImageParams.CompressionLevel>(mainActivity, android.R.layout.simple_spinner_item, items_compression);
+            dropdown_compresion.setAdapter(adapter_compression);
+
+            // Add view mode text and dropdown
+            LinearLayout container_1 = new LinearLayout(camera_list.getContext());
+            container_1.setOrientation(LinearLayout.HORIZONTAL);
+            container_1.addView(text_viewmode);
+            container_1.addView(dropdown_viewmode);
+
+            // Add compression text and dropdown
+            LinearLayout container_2 = new LinearLayout(camera_list.getContext());
+            container_2.setOrientation(LinearLayout.HORIZONTAL);
+            container_2.addView(text_compression);
+            container_2.addView(dropdown_compresion);
+
+            // Add camera checkbox, compression layout
+            LinearLayout container_3 = new LinearLayout(camera_list.getContext());
+            container_3.setOrientation(LinearLayout.VERTICAL);
+            container_3.addView(checkbox);
+            container_3.addView(container_1);
+            container_3.addView(container_2);
+
+            // Add camera group to the entire layout
+            camera_list.addView(container_3);
         }
     }
 
