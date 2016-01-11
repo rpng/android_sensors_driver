@@ -86,8 +86,8 @@ class Sample2View extends SampleCvViewBase {
 	            Imgproc.cvtColor(mGray, mRgba, Imgproc.COLOR_GRAY2RGBA, 4);
 	            break;
             case RGBA:
-	            capture.retrieve(mIntermediateMat, Highgui.CV_CAP_ANDROID_COLOR_FRAME_RGBA);
-                Imgproc.cvtColor(mIntermediateMat, mRgba, Imgproc.COLOR_RGB2BGRA, 4);
+	            capture.retrieve(mRgba, Highgui.CV_CAP_ANDROID_COLOR_FRAME_RGBA);
+                //Imgproc.cvtColor(mIntermediateMat, mRgba, Imgproc.COLOR_RGB2BGRA, 4);
                 //Core.putText(mRgba, "OpenCV + Android", new Point(10, 100), 3, 2, new Scalar(255, 0, 0, 255), 3);
 	            break;
             case CANNY:
