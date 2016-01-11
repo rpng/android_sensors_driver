@@ -232,7 +232,7 @@ public class Config {
             ArrayList<Integer> cameras = new ArrayList<>();
             // Find all cameras that have been enabled
             for(int i=0; i<camera_list.getChildCount(); i++) {
-                if(((CheckBox)camera_list.getChildAt(i)).isChecked())
+                if(((CheckBox)((LinearLayout)camera_list.getChildAt(i)).getChildAt(0)).isChecked())
                     cameras.add(i);
             }
             // Create the node
@@ -380,7 +380,7 @@ public class Config {
             return true;
         // Loop through current ones
         for(int i=0; i<camera_list.getChildCount(); i++) {
-            if(((CheckBox)camera_list.getChildAt(i)).isChecked()!=old_camera_list.get(i))
+            if(((CheckBox)((LinearLayout)camera_list.getChildAt(i)).getChildAt(0)).isChecked()!=old_camera_list.get(i))
                 return true;
         }
         return false;

@@ -34,12 +34,8 @@ class Sample2View extends SampleCvViewBase {
     private Mat mIntermediateMat;
 
     private int camera_id;
-    private String robotName;
-    private double stats[][];
-    private int counter;
-    private int numSamples = 50;
-    private Time oldTime;
-    private Time newTime;
+    private ImageParams.ViewMode viewMode;
+    private ImageParams.CompressionLevel compressionLevel;
         
     private ByteBuffer bb;
     private Bitmap bmp;
@@ -53,10 +49,12 @@ class Sample2View extends SampleCvViewBase {
     sensor_msgs.CameraInfo cameraInfo;
     private final ConnectedNode connectedNode;
 
-    public Sample2View(Context context, ConnectedNode connectedNode, int camera_id, String robotName) {
+    public Sample2View(Context context, ConnectedNode connectedNode, int camera_id, String robotName, ImageParams.ViewMode viewMode, ImageParams.CompressionLevel compressionLevel) {
         super(context, camera_id);
         this.connectedNode = connectedNode;
         this.camera_id = camera_id;
+        this.viewMode = viewMode;
+        this.compressionLevel = compressionLevel;
         // Create the publishers
         this.imagePublisher = connectedNode.newPublisher("/android/"+robotName+"/camera_"+(camera_id+1)+"/image/compressed", sensor_msgs.CompressedImage._TYPE);
         this.cameraInfoPublisher = connectedNode.newPublisher("/android/"+robotName+"/camera_"+(camera_id+1)+"/camera_info", sensor_msgs.CameraInfo._TYPE);
@@ -65,10 +63,6 @@ class Sample2View extends SampleCvViewBase {
         stream = new ChannelBufferOutputStream(MessageBuffers.dynamicBuffer());
         bmp = null;
         bb = null;
-        // TODO: Stats (delete or update)
-        stats = new double[10][numSamples];
-        oldTime = connectedNode.getCurrentTime();
-        counter = 0;
     }
 
     @Override
@@ -85,37 +79,30 @@ class Sample2View extends SampleCvViewBase {
     @Override
     protected Bitmap processFrame(VideoCapture capture)
     {
-    	Time[] measureTime = new Time[9];
-    	String[] compDescStrings = {"Total processFrame","Grab a new frame","MatToBitmap","Publish cameraInfo",
-    								"Create ImageMsg","Compress image","Transfer to Stream","Image.SetData","Publish Image","Total econds per frame"};
-    	String[] rawDescStrings = { "Total processFrame","Grab a new frame","MatToBitmap","Publish cameraInfo",
-									"Create ImageMsg","Pixel to buffer","Transfer to Stream","Image.SetData","Publish Image","Total seconds per frame"};
-    	measureTime[0] = connectedNode.getCurrentTime();
-    	
-        //switch (MainActivity.viewMode)
-        //{
-//	        case MainActivity.VIEW_MODE_GRAY:
+        // Use opencv to handle our image based on our configuration
+        switch (viewMode){
+            case GRAY:
 	            capture.retrieve(mGray, Highgui.CV_CAP_ANDROID_GREY_FRAME);
 	            Imgproc.cvtColor(mGray, mRgba, Imgproc.COLOR_GRAY2RGBA, 4);
-//	            break;
-//	        case MainActivity.VIEW_MODE_RGBA:
-//	            capture.retrieve(mIntermediateMat, Highgui.CV_CAP_ANDROID_COLOR_FRAME_RGBA);
-//                Imgproc.cvtColor(mIntermediateMat, mRgba, Imgproc.COLOR_RGB2BGRA, 4);
-        //Core.putText(mRgba, "OpenCV + Android", new Point(10, 100), 3, 2, new Scalar(255, 0, 0, 255), 3);
-//	            break;
-//	        case MainActivity.VIEW_MODE_CANNY:
-//	            capture.retrieve(mGray, Highgui.CV_CAP_ANDROID_GREY_FRAME);
-//	            Imgproc.Canny(mGray, mIntermediateMat, 80, 100);
-//	            Imgproc.cvtColor(mIntermediateMat, mRgba, Imgproc.COLOR_GRAY2BGRA, 4);
-		//		break;
-        //}
+	            break;
+            case RGBA:
+	            capture.retrieve(mIntermediateMat, Highgui.CV_CAP_ANDROID_COLOR_FRAME_RGBA);
+                Imgproc.cvtColor(mIntermediateMat, mRgba, Imgproc.COLOR_RGB2BGRA, 4);
+                //Core.putText(mRgba, "OpenCV + Android", new Point(10, 100), 3, 2, new Scalar(255, 0, 0, 255), 3);
+	            break;
+            case CANNY:
+	            capture.retrieve(mGray, Highgui.CV_CAP_ANDROID_GREY_FRAME);
+	            Imgproc.Canny(mGray, mIntermediateMat, 80, 100);
+	            Imgproc.cvtColor(mIntermediateMat, mRgba, Imgproc.COLOR_GRAY2BGRA, 4);
+				break;
+        }
+
+        // Time to publish these messages
         Time currentTime = connectedNode.getCurrentTime();
-        
-        measureTime[1] = connectedNode.getCurrentTime();
-        
+
+        // If we have a null bitmap, or it has changed size, create a new one
         if(bmp == null || mRgba.rows() != bmp.getHeight() || mRgba.cols()!=bmp.getWidth()) {
             bmp = Bitmap.createBitmap(mRgba.cols(), mRgba.rows(), Bitmap.Config.ARGB_8888);
-            System.out.println("HIT");
         }
 
 //        if(MainActivity.imageCompression == MainActivity.IMAGE_TRANSPORT_COMPRESSION_NONE && bb == null)
@@ -129,7 +116,6 @@ class Sample2View extends SampleCvViewBase {
         try
         {
         	Utils.matToBitmap(mRgba, bmp);
-        	measureTime[2] = connectedNode.getCurrentTime();
         	
         	cameraInfo = cameraInfoPublisher.newMessage();
             cameraInfo.getHeader().setFrameId("camera");
@@ -137,44 +123,31 @@ class Sample2View extends SampleCvViewBase {
             cameraInfo.setWidth(mRgba.cols());
             cameraInfo.setHeight(mRgba.rows());
             cameraInfoPublisher.publish(cameraInfo);
-            measureTime[3] = connectedNode.getCurrentTime();
-            
-            //if(MainActivity.imageCompression >= MainActivity.IMAGE_TRANSPORT_COMPRESSION_PNG)
-            //{
-            	//Compressed image
-            	
+
+            // If we are not "RAW" then compress
+            if(compressionLevel != ImageParams.CompressionLevel.NONE) {
+                // Create and configure our compresseed image message
             	sensor_msgs.CompressedImage image = imagePublisher.newMessage();
-	            //if(MainActivity.imageCompression == MainActivity.IMAGE_TRANSPORT_COMPRESSION_PNG)
-	            //	image.setFormat("png");
-	            //else if(MainActivity.imageCompression == MainActivity.IMAGE_TRANSPORT_COMPRESSION_JPEG)
-	            	image.setFormat("jpeg");
+                //image.setFormat("png");
+                image.setFormat("jpeg");
 	            image.getHeader().setStamp(currentTime);
 	            image.getHeader().setFrameId("camera");
-	            measureTime[4] = connectedNode.getCurrentTime();
-	
+
+                // Create our stream, and compress
 	        	ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	            //if(MainActivity.imageCompression == MainActivity.IMAGE_TRANSPORT_COMPRESSION_PNG)
-	            //	bmp.compress(Bitmap.CompressFormat.PNG, 100, baos);
-	            //else if(MainActivity.imageCompression == MainActivity.IMAGE_TRANSPORT_COMPRESSION_JPEG)
-	            	bmp.compress(Bitmap.CompressFormat.JPEG, 20, baos);
-	        	measureTime[5] = connectedNode.getCurrentTime();
-	
+                //bmp.compress(Bitmap.CompressFormat.PNG, 100, baos);
+                bmp.compress(Bitmap.CompressFormat.JPEG, compressionLevel.getLevel(), baos);
+
+                // Stream the data
 	        	stream.buffer().writeBytes(baos.toByteArray());
-	        	measureTime[6] = connectedNode.getCurrentTime();
-	
-	        	image.setData(stream.buffer().copy());
-	        	measureTime[7] = connectedNode.getCurrentTime();
-	
-	            stream.buffer().clear();
+                image.setData(stream.buffer().copy());
+                stream.buffer().clear();
+
+                // Publish
 	        	imagePublisher.publish(image);
-	        	measureTime[8] = connectedNode.getCurrentTime();
-            /*
-            }
-            else
-            {
+
+            } else {
 	        	// Raw image
-		        
-            	Log.i(TAG,"Raw image 1");
 	            sensor_msgs.Image rawImage = rawImagePublisher.newMessage();
 	            rawImage.getHeader().setStamp(currentTime);
 	            rawImage.getHeader().setFrameId("camera");
@@ -182,34 +155,18 @@ class Sample2View extends SampleCvViewBase {
 	            rawImage.setWidth(bmp.getWidth());
 	            rawImage.setHeight(bmp.getHeight());
 	            rawImage.setStep(640);
-	            measureTime[4] = connectedNode.getCurrentTime();
-		
-	            Log.i(TAG,"Raw image 2");
 	            
 	            bmp.copyPixelsToBuffer(bb);
-	            measureTime[5] = connectedNode.getCurrentTime();
-	
-	            Log.i(TAG,"Raw image 3");
 	            
 	            stream.buffer().writeBytes(bb.array());
 	            bb.clear();
-	            measureTime[6] = connectedNode.getCurrentTime();
-	
-	            Log.i(TAG,"Raw image 4");
 	            
 	        	rawImage.setData(stream.buffer().copy());
 	        	stream.buffer().clear();
-	        	measureTime[7] = connectedNode.getCurrentTime();
-	
-	        	Log.i(TAG,"Raw image 5");
 	        	
 	            rawImagePublisher.publish(rawImage);
-	            measureTime[8] = connectedNode.getCurrentTime();
-	            Log.i(TAG,"Raw image 6");
             }
-            */
-        	
-        	
+
             return bmp;
         } catch(Exception e) {
             System.err.println("Frame conversion and publishing throws an exception: " + e.getMessage());

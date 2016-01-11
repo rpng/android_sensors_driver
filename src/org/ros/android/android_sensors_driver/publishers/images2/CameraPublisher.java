@@ -178,7 +178,7 @@ public class CameraPublisher implements NodeMain
             // Create and set views
             for(Integer camera_id: camera_ids) {
                 // Create a new camera node
-                Sample2View temp = new Sample2View(mainActivity.getBaseContext(), node, camera_id, robotName);
+                Sample2View temp = new Sample2View(mainActivity.getBaseContext(), node, camera_id, robotName, ImageParams.ViewMode.CANNY, ImageParams.CompressionLevel.VERY_HIGH);
                 mViews.add(temp);
                 mViewList.add(temp);
             }
