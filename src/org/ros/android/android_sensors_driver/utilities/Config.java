@@ -58,6 +58,8 @@ public class Config {
     protected boolean old_navsat;
     protected boolean old_temp;
     protected ArrayList<Boolean> old_camera_list;
+    protected ArrayList<ImageParams.ViewMode> old_camera_viewmode;
+    protected ArrayList<ImageParams.CompressionLevel> old_camera_compression;
 
 
     protected FluidPressurePublisher pub_fluid;
@@ -90,6 +92,8 @@ public class Config {
         // Load old variables, booleans default to false
         old_robot_name = robot_name.getText().toString();
         old_camera_list = new ArrayList<>();
+        old_camera_viewmode = new ArrayList<>();
+        old_camera_compression = new ArrayList<>();
 
         // Load our camera listing in
         load_cameras();
@@ -230,16 +234,22 @@ public class Config {
             nodeMainExecutor.shutdownNodeMain(pub_cameras);
             // List of enabled cameras
             ArrayList<Integer> cameras = new ArrayList<>();
+            ArrayList<ImageParams.ViewMode> cameras_viewmode = new ArrayList<>();
+            ArrayList<ImageParams.CompressionLevel> cameras_compression = new ArrayList<>();
             // Find all cameras that have been enabled
             for(int i=0; i<camera_list.getChildCount(); i++) {
-                if(((CheckBox)((LinearLayout)camera_list.getChildAt(i)).getChildAt(0)).isChecked())
+                if(((CheckBox)((LinearLayout)camera_list.getChildAt(i)).getChildAt(0)).isChecked()) {
                     cameras.add(i);
+                    cameras_viewmode.add((ImageParams.ViewMode)((Spinner)((LinearLayout)((LinearLayout) camera_list.getChildAt(i)).getChildAt(1)).getChildAt(1)).getSelectedItem());
+                    cameras_compression.add((ImageParams.CompressionLevel)((Spinner)((LinearLayout) ((LinearLayout) camera_list.getChildAt(i)).getChildAt(2)).getChildAt(1)).getSelectedItem());
+
+                }
             }
             // Create the node
             NodeConfiguration nodeConfiguration7 = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
             nodeConfiguration7.setMasterUri(masterURI);
             nodeConfiguration7.setNodeName("android_sensors_driver_cameras");
-            pub_cameras = new CameraPublisher(mainActivity, cameras, robot_name_text);
+            pub_cameras = new CameraPublisher(mainActivity, cameras, robot_name_text, cameras_viewmode, cameras_compression);
             nodeMainExecutor.execute(pub_cameras, nodeConfiguration7);
         }
 
@@ -254,7 +264,9 @@ public class Config {
 
         // Update camera params
         for(int i=0; i<camera_list.getChildCount(); i++) {
-            old_camera_list.add(i, ((CheckBox)camera_list.getChildAt(i)).isChecked());
+            old_camera_list.add(i, ((CheckBox)((LinearLayout)camera_list.getChildAt(i)).getChildAt(0)).isChecked());
+            old_camera_viewmode.add(i, (ImageParams.ViewMode)((Spinner)((LinearLayout) ((LinearLayout) camera_list.getChildAt(i)).getChildAt(1)).getChildAt(1)).getSelectedItem());
+            old_camera_compression.add(i, (ImageParams.CompressionLevel)((Spinner)((LinearLayout) ((LinearLayout) camera_list.getChildAt(i)).getChildAt(2)).getChildAt(1)).getSelectedItem());
         }
 
         // Re-enable button
@@ -330,7 +342,8 @@ public class Config {
                     ImageParams.ViewMode.CANNY
             };
             ArrayAdapter<ImageParams.ViewMode> adapter_viewmode =
-                    new ArrayAdapter<ImageParams.ViewMode>(mainActivity, android.R.layout.simple_spinner_item, items_viewmode);
+                    new ArrayAdapter<ImageParams.ViewMode>(mainActivity, R.layout.custom_spinner, items_viewmode);
+            adapter_viewmode.setDropDownViewResource(R.layout.custom_spinner_item);
             dropdown_viewmode.setAdapter(adapter_viewmode);
             // Camera compression text
             TextView text_compression = new TextView(mainActivity);
@@ -347,7 +360,8 @@ public class Config {
                     ImageParams.CompressionLevel.NONE,
             };
             ArrayAdapter<ImageParams.CompressionLevel> adapter_compression =
-                    new ArrayAdapter<ImageParams.CompressionLevel>(mainActivity, android.R.layout.simple_spinner_item, items_compression);
+                    new ArrayAdapter<ImageParams.CompressionLevel>(mainActivity, R.layout.custom_spinner, items_compression);
+            adapter_compression.setDropDownViewResource(R.layout.custom_spinner_item);
             dropdown_compresion.setAdapter(adapter_compression);
 
             // Add view mode text and dropdown
@@ -376,11 +390,15 @@ public class Config {
 
     public boolean hasCamerasChanged() {
         // Check to see if we have a new camera list
-        if(old_camera_list.isEmpty())
+        if(old_camera_list.isEmpty() || old_camera_viewmode.isEmpty() || old_camera_compression.isEmpty())
             return true;
         // Loop through current ones
         for(int i=0; i<camera_list.getChildCount(); i++) {
             if(((CheckBox)((LinearLayout)camera_list.getChildAt(i)).getChildAt(0)).isChecked()!=old_camera_list.get(i))
+                return true;
+            if((ImageParams.ViewMode)((Spinner)((LinearLayout) ((LinearLayout) camera_list.getChildAt(i)).getChildAt(1)).getChildAt(1)).getSelectedItem()!=old_camera_viewmode.get(i))
+                return true;
+            if((ImageParams.CompressionLevel)((Spinner)((LinearLayout) ((LinearLayout) camera_list.getChildAt(i)).getChildAt(2)).getChildAt(1)).getSelectedItem()!=old_camera_compression.get(i))
                 return true;
         }
         return false;

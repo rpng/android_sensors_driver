@@ -57,6 +57,8 @@ public class CameraPublisher implements NodeMain
     private ArrayList<Sample2View> mViews;
     private ArrayList<View> mViewList;
     private ArrayList<Integer> camera_ids;
+    private ArrayList<ImageParams.ViewMode> cameras_viewmode;
+    private ArrayList<ImageParams.CompressionLevel> cameras_compression;
     private String robotName;
     private Activity mainActivity;
     private ConnectedNode node = null;
@@ -64,10 +66,12 @@ public class CameraPublisher implements NodeMain
     LinearLayout layout;
     LinearLayout.LayoutParams params;
 
-    public CameraPublisher(Activity mainAct, ArrayList<Integer> camera_ids, String robotName) {
+    public CameraPublisher(Activity mainAct, ArrayList<Integer> camera_ids, String robotName, ArrayList<ImageParams.ViewMode> cameras_viewmode, ArrayList<ImageParams.CompressionLevel> cameras_compression) {
         this.mainActivity = mainAct;
         this.camera_ids = camera_ids;
         this.robotName = robotName;
+        this.cameras_viewmode = cameras_viewmode;
+        this.cameras_compression = cameras_compression;
         // Layout variables
         layout = (LinearLayout) mainActivity.findViewById(R.id.view_main);
         params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
@@ -176,9 +180,9 @@ public class CameraPublisher implements NodeMain
                 return;
             }
             // Create and set views
-            for(Integer camera_id: camera_ids) {
+            for(int i=0; i<camera_ids.size(); i++) {
                 // Create a new camera node
-                Sample2View temp = new Sample2View(mainActivity.getBaseContext(), node, camera_id, robotName, ImageParams.ViewMode.CANNY, ImageParams.CompressionLevel.VERY_HIGH);
+                Sample2View temp = new Sample2View(mainActivity.getBaseContext(), node, camera_ids.get(i), robotName, cameras_viewmode.get(i), cameras_compression.get(i));
                 mViews.add(temp);
                 mViewList.add(temp);
             }
