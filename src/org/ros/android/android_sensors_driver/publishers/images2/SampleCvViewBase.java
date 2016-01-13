@@ -31,7 +31,7 @@ public abstract class SampleCvViewBase extends SurfaceView implements SurfaceHol
     }
 
     public boolean openCamera() {
-        System.out.println("Opening camera "+camera_id);
+        System.out.println("Opening camera " + camera_id);
         synchronized (this) {
 	        releaseCamera();
 	        mCamera = new VideoCapture(camera_id);
@@ -89,7 +89,7 @@ public abstract class SampleCvViewBase extends SurfaceView implements SurfaceHol
     }
     
     public void surfaceChanged(SurfaceHolder _holder, int format, int width, int height) {
-        setupCamera(width,height);
+        setupCamera(width, height);
     }
 
     public void surfaceCreated(SurfaceHolder holder) {
@@ -105,11 +105,10 @@ public abstract class SampleCvViewBase extends SurfaceView implements SurfaceHol
     public void run() {
         while (true) {
             Bitmap bmp = null;
-
-            if(!mHolder.getSurface().isValid())
-                continue;
-
             synchronized (this) {
+                // Check for valid surface
+                if(!mHolder.getSurface().isValid())
+                    break;
                 // If we do not have a camera, skip
                 if (mCamera == null)
                     break;
@@ -121,11 +120,6 @@ public abstract class SampleCvViewBase extends SurfaceView implements SurfaceHol
                 bmp = processFrame(mCamera);
             }
 
-
-
-//            Canvas canvas = mHolder.lockCanvas();
-//            mHolder.unlockCanvasAndPost(canvas);
-//            bmp.recycle();
             // TODO: If we have a bitmap then display it for the user
             // TODO: This causes this thread to lag, deal with this later
             if (bmp != null) {
@@ -134,8 +128,10 @@ public abstract class SampleCvViewBase extends SurfaceView implements SurfaceHol
                     canvas.drawBitmap(bmp, null, new Rect(0, 0, getWidth(), getHeight()), null);
                     mHolder.unlockCanvasAndPost(canvas);
                 }
-                //bmp.recycle();
             }
+        }
+        if(mHolder.getSurface().isValid()) {
+            mHolder.getSurface().release();
         }
     }
 }

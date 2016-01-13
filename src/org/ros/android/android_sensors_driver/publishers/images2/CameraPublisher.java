@@ -38,6 +38,7 @@ import android.widget.Toast;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
+import org.ros.android.android_sensors_driver.MainActivity;
 import org.ros.android.android_sensors_driver.R;
 import org.ros.node.ConnectedNode;
 import org.ros.namespace.GraphName;
@@ -60,13 +61,13 @@ public class CameraPublisher implements NodeMain
     private ArrayList<ImageParams.ViewMode> cameras_viewmode;
     private ArrayList<ImageParams.CompressionLevel> cameras_compression;
     private String robotName;
-    private Activity mainActivity;
+    private MainActivity mainActivity;
     private ConnectedNode node = null;
 
     LinearLayout layout;
     LinearLayout.LayoutParams params;
 
-    public CameraPublisher(Activity mainAct, ArrayList<Integer> camera_ids, String robotName, ArrayList<ImageParams.ViewMode> cameras_viewmode, ArrayList<ImageParams.CompressionLevel> cameras_compression) {
+    public CameraPublisher(MainActivity mainAct, ArrayList<Integer> camera_ids, String robotName, ArrayList<ImageParams.ViewMode> cameras_viewmode, ArrayList<ImageParams.CompressionLevel> cameras_compression) {
         this.mainActivity = mainAct;
         this.camera_ids = camera_ids;
         this.robotName = robotName;
@@ -133,10 +134,11 @@ public class CameraPublisher implements NodeMain
     public void releaseCameras() {
         // Release the cameras
         for(int i=0;i<mViews.size(); i++){
-            if (null != mViews.get(i)) {
+            if (mViews.get(i) != null) {
                 mViews.get(i).releaseCamera();
             }
         }
+
     }
 
     public void onError(Node node, Throwable throwable) {
@@ -150,8 +152,16 @@ public class CameraPublisher implements NodeMain
         mainActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                for(int i=0; i<mViewList.size(); i++)
+                // Release each view
+                for(int i=0; i<mViewList.size(); i++) {
                     layout.removeView(mViewList.get(i));
+                    mViewList.get(i).setVisibility(View.GONE);
+                }
+                // Clean old refs
+                mViewList = null;
+                mViews = null;
+                // Try to run garbage
+                System.gc();
             }
         });
     }
@@ -182,7 +192,7 @@ public class CameraPublisher implements NodeMain
             // Create and set views
             for(int i=0; i<camera_ids.size(); i++) {
                 // Create a new camera node
-                Sample2View temp = new Sample2View(mainActivity.getBaseContext(), node, camera_ids.get(i), robotName, cameras_viewmode.get(i), cameras_compression.get(i));
+                Sample2View temp = new Sample2View(mainActivity, mainActivity.getBaseContext(), node, camera_ids.get(i), robotName, cameras_viewmode.get(i), cameras_compression.get(i));
                 mViews.add(temp);
                 mViewList.add(temp);
             }

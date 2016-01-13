@@ -24,12 +24,21 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 21
-
     defaultConfig {
         minSdkVersion 15
         applicationId "org.ros.android.android_sensors_driver"
         targetSdkVersion 15
         versionCode 1
         versionName "1.0"
+    }
+    compileOptions {
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+    productFlavors {
+    }
+    buildTypes {
+        debug {
+            jniDebuggable true
+        }
     }
 }

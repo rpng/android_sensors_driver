@@ -2,15 +2,19 @@ package org.ros.android.android_sensors_driver.publishers.images2;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 
+import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferOutputStream;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
+import org.ros.android.android_sensors_driver.MainActivity;
 import org.ros.android.android_sensors_driver.R;
 import org.ros.internal.message.MessageBuffers;
 import org.ros.message.Time;
@@ -23,6 +27,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.util.Log;
 import android.view.SurfaceHolder;
+import android.widget.Toast;
 
 /**
 * @author axelfurlan@gmail.com (Axel Furlan)
@@ -45,16 +50,18 @@ class Sample2View extends SampleCvViewBase {
     private final Publisher<sensor_msgs.CameraInfo> cameraInfoPublisher;
     
     private ChannelBufferOutputStream stream;
+    private MainActivity mainActivity;
     
     sensor_msgs.CameraInfo cameraInfo;
     private final ConnectedNode connectedNode;
 
-    public Sample2View(Context context, ConnectedNode connectedNode, int camera_id, String robotName, ImageParams.ViewMode viewMode, ImageParams.CompressionLevel compressionLevel) {
+    public Sample2View(MainActivity mainActivity, Context context, ConnectedNode connectedNode, int camera_id, String robotName, ImageParams.ViewMode viewMode, ImageParams.CompressionLevel compressionLevel) {
         super(context, camera_id);
         this.connectedNode = connectedNode;
         this.camera_id = camera_id;
         this.viewMode = viewMode;
         this.compressionLevel = compressionLevel;
+        this.mainActivity = mainActivity;
         // Create the publishers
         this.imagePublisher = connectedNode.newPublisher("/android/"+robotName+"/camera_"+(camera_id+1)+"/image/compressed", sensor_msgs.CompressedImage._TYPE);
         this.cameraInfoPublisher = connectedNode.newPublisher("/android/"+robotName+"/camera_"+(camera_id+1)+"/camera_info", sensor_msgs.CameraInfo._TYPE);
@@ -79,6 +86,9 @@ class Sample2View extends SampleCvViewBase {
     @Override
     protected Bitmap processFrame(VideoCapture capture)
     {
+        // Check for nulls
+        if(mGray == null || mRgba == null || mIntermediateMat == null)
+            return null;
         // Use opencv to handle our image based on our configuration
         switch (viewMode){
             case GRAY:
@@ -100,22 +110,20 @@ class Sample2View extends SampleCvViewBase {
         // Time to publish these messages
         Time currentTime = connectedNode.getCurrentTime();
 
-        // If we have a null bitmap, or it has changed size, create a new one
-        if(bmp == null || mRgba.rows() != bmp.getHeight() || mRgba.cols()!=bmp.getWidth()) {
-            bmp = Bitmap.createBitmap(mRgba.cols(), mRgba.rows(), Bitmap.Config.ARGB_8888);
-        }
-
-//        if(MainActivity.imageCompression == MainActivity.IMAGE_TRANSPORT_COMPRESSION_NONE && bb == null)
-//        {
-//        	Log.i(TAG,"Buffer 1");
-//        	bb = ByteBuffer.allocate(bmp.getRowBytes()*bmp.getHeight());
-//        	Log.i(TAG,"Buffer 2");
-//        	bb.clear();
-//        	Log.i(TAG,"Buffer 3");
-//        }
         try
         {
-        	Utils.matToBitmap(mRgba, bmp);
+            // If we have a null bitmap, or it has changed size, create a new one
+            if(bmp == null || mRgba.rows() != bmp.getHeight() || mRgba.cols()!=bmp.getWidth()) {
+                bmp = Bitmap.createBitmap(mRgba.cols(), mRgba.rows(), Bitmap.Config.ARGB_8888);
+            }
+
+            // Create our buffer for raw image
+            if(compressionLevel == ImageParams.CompressionLevel.NONE || bb == null) {
+                bb = ByteBuffer.allocate(bmp.getRowBytes()*bmp.getHeight());
+                bb.clear();
+            }
+
+            Utils.matToBitmap(mRgba, bmp);
         	
         	cameraInfo = cameraInfoPublisher.newMessage();
             cameraInfo.getHeader().setFrameId("camera");
@@ -154,20 +162,34 @@ class Sample2View extends SampleCvViewBase {
 	            rawImage.setEncoding("rgba8");
 	            rawImage.setWidth(bmp.getWidth());
 	            rawImage.setHeight(bmp.getHeight());
-	            rawImage.setStep(640);
-	            
-	            bmp.copyPixelsToBuffer(bb);
-	            
-	            stream.buffer().writeBytes(bb.array());
-	            bb.clear();
-	            
+	            rawImage.setStep(bmp.getWidth()*4);
+
+                bmp.copyPixelsToBuffer(bb);
+
+                stream.buffer().clear();
+                stream.buffer().writeBytes(bb.array());
+                bb.clear();
+
 	        	rawImage.setData(stream.buffer().copy());
 	        	stream.buffer().clear();
-	        	
+
 	            rawImagePublisher.publish(rawImage);
             }
 
             return bmp;
+        } catch(OutOfMemoryError e) {
+            System.err.println("Frame conversion and publishing throws an out of memory error: " + e.getMessage());
+            bmp.recycle();
+            // Let the user know
+            mainActivity.runOnUiThread(new Runnable() {
+                public void run() {
+                    Toast toast = Toast.makeText(mainActivity, "Error: Out Of Memory", Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+            });
+            // Shutdown
+            connectedNode.shutdown();
+            return null;
         } catch(Exception e) {
             System.err.println("Frame conversion and publishing throws an exception: " + e.getMessage());
             bmp.recycle();
@@ -186,10 +208,20 @@ class Sample2View extends SampleCvViewBase {
                 mGray.release();
             if (mIntermediateMat != null)
                 mIntermediateMat.release();
-
+            if(bb != null)
+                bb.clear();
+            if(bmp != null)
+                bmp.recycle();
+            try {
+                stream.close();
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
             mRgba = null;
             mGray = null;
             mIntermediateMat = null;
+            bb = null;
+            bmp = null;
         }
     }
 }

@@ -161,6 +161,7 @@ public class Config {
         // Fluid node shutdown
         else if(checkbox_fluid.isChecked() != old_fluid) {
             nodeMainExecutor.shutdownNodeMain(pub_fluid);
+            pub_fluid = null;
         }
 
         // Illuminance node startup
@@ -174,6 +175,7 @@ public class Config {
         // Illuminance node shutdown
         else if(checkbox_illuminance.isChecked() != old_illuminance) {
             nodeMainExecutor.shutdownNodeMain(pub_illuminance);
+            pub_illuminance = null;
         }
 
         // IMU node startup
@@ -187,6 +189,7 @@ public class Config {
         // IMU node shutdown
         else if(checkbox_imu.isChecked() != old_imu) {
             nodeMainExecutor.shutdownNodeMain(pub_imu);
+            pub_imu = null;
         }
 
         // Magnetic node startup
@@ -200,6 +203,7 @@ public class Config {
         // Magnetic node shutdown
         else if(checkbox_magnetic.isChecked() != old_magnetic) {
             nodeMainExecutor.shutdownNodeMain(pub_magnetic);
+            pub_magnetic = null;
         }
 
         // Navigation satellite node startup
@@ -213,6 +217,7 @@ public class Config {
         // Navigation satellite node shutdown
         else if(checkbox_navsat.isChecked() != old_navsat) {
             nodeMainExecutor.shutdownNodeMain(pub_navsat);
+            pub_navsat = null;
         }
 
         // Temperature node startup
@@ -226,12 +231,16 @@ public class Config {
         // Temperature node shutdown
         else if(checkbox_temp.isChecked() != old_temp) {
             nodeMainExecutor.shutdownNodeMain(pub_temp);
+            pub_temp = null;
         }
 
         // Camera node startup, restart all nodes when we change cameras
         if(hasCamerasChanged()) {
             // Ensure all cameras are shutdown
             nodeMainExecutor.shutdownNodeMain(pub_cameras);
+            //((LinearLayout) mainActivity.findViewById(R.id.view_main)).removeAllViews();
+            //((LinearLayout) mainActivity.findViewById(R.id.view_main)).removeAllViewsInLayout();
+            pub_cameras = null;
             // List of enabled cameras
             ArrayList<Integer> cameras = new ArrayList<>();
             ArrayList<ImageParams.ViewMode> cameras_viewmode = new ArrayList<>();

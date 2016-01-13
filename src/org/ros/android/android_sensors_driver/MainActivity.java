@@ -177,23 +177,6 @@ public class MainActivity extends RosActivity {
                             dialog.dismiss();
                         }
                     });
-            builder.setNeutralButton(getResources().getString(R.string.help_wiki),
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            Intent i = new Intent(Intent.ACTION_VIEW);
-                            Uri u = Uri.parse("https://github.com/rpng/android_sensors_driver/wiki");
-                            try {
-                                // Start the activity
-                                i.setData(u);
-                                startActivity(i);
-                            } catch (ActivityNotFoundException e) {
-                                // Raise on activity not found
-                                Toast toast = Toast.makeText(MainActivity.this, "Browser not found.", Toast.LENGTH_SHORT);
-                                toast.show();
-                            }
-                        }
-                    });
             builder.setPositiveButton(getResources().getString(R.string.help_report),
                     new DialogInterface.OnClickListener() {
                         @Override
@@ -228,7 +211,6 @@ public class MainActivity extends RosActivity {
      * http://developer.android.com/training/animation/crossfade.html#views
      */
     private void toggleConfigView() {
-        System.out.println("HIT 2");
         // Decide which view to hide and which to show.
         boolean state = mConfigView.getVisibility() != View.VISIBLE;
         final View showView = state ? mConfigView : mMainView;
@@ -254,7 +236,7 @@ public class MainActivity extends RosActivity {
             .setListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                hideView.setVisibility(View.GONE);
+                    hideView.setVisibility(View.GONE);
                 }
             });
     }
