@@ -1,44 +1,130 @@
 /*
- * Copyright (C) 2011 Google Inc.
+ * Copyright (c) 2015, Tal Regev
+ * All rights reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Android Sensors Driver nor the names of its
+ *       contributors may be used to endorse or promote products derived from
+ *       this software without specific prior written permission.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
-dependencies {
-    compile 'org.ros.rosjava_core:rosjava:[0.1,0.2)'
-    compile 'org.ros.android_core:android_honeycomb_mr2:0.1.+'
-    compile files('libs/opencv_library-2.4.3.jar')
+task wrapper(type: Wrapper) {
+    gradleVersion = "2.7"
 }
 
-apply plugin: 'com.android.application'
+buildscript {
+    apply from: project.file("buildscript.gradle")
+}
 
-android {
-    compileSdkVersion 21
-    defaultConfig {
-        minSdkVersion 15
-        applicationId "org.ros.android.android_sensors_driver"
-        targetSdkVersion 15
-        versionCode 1
-        versionName "1.0"
+apply plugin: "catkin"
+
+allprojects {
+    group "org"
+    version = project.catkin.pkg.version
+}
+
+String version = project.catkin.pkg.version
+int versionNum = Integer.valueOf(version.replace(".", ""))
+
+
+subprojects {
+
+    /*
+     * The ros plugin configures a few things:
+     *
+     *  - local deployment repository : where it dumps the jars and packaged artifacts)
+     *  - local maven repositories    : where it finds your locally installed/built artifacts)
+     *  - external maven repositories : where it goes looking if it can't find dependencies locally
+     *
+     * To modify, or add repos to the default external maven repositories list, pull request against this code:
+     *
+     *   https://github.com/rosjava/rosjava_bootstrap/blob/indigo/gradle_plugins/src/main/groovy/org/ros/gradle_plugins/RosPlugin.groovy#L31
+     */
+    if (name == "image") {
+        apply plugin: "ros-java"
+        apply plugin: "osgi"
+        apply plugin: "idea"
+        apply plugin: "eclipse"
     }
-    compileOptions {
-        targetCompatibility JavaVersion.VERSION_1_7
-    }
-    productFlavors {
-    }
-    buildTypes {
-        debug {
-            jniDebuggable true
+
+
+    /*
+     * The android plugin configures a few things:
+     *
+     *  - local deployment repository : where it dumps the jars and packaged artifacts)
+     *  - local maven repositories    : where it finds your locally installed/built artifacts)
+     *  - external maven repositories : where it goes looking if it can't find dependencies locally
+     *  - android build tools version : which version we use across the board
+     *
+     * To modify, or add repos to the default external maven repositories list, pull request against this code:
+     *
+     *   https://github.com/rosjava/rosjava_bootstrap/blob/indigo/gradle_plugins/src/main/groovy/org/ros/gradle_plugins/RosPlugin.groovy#L31
+     *
+     * To modify the build tools version, pull request against this code:
+     *
+     *   https://github.com/rosjava/rosjava_bootstrap/blob/indigo/gradle_plugins/src/main/groovy/org/ros/gradle_plugins/RosAndroid.groovy#L14
+     */
+    afterEvaluate { project ->
+        if (name != "image") {
+            apply plugin: "ros-android"
+            android {
+                compileSdkVersion 23
+                buildToolsVersion "23.0.2"
+
+                defaultConfig {
+                    versionName version
+                    versionCode versionNum
+                }
+
+                // Change the layout of Android projects to be compatible with Eclipse.
+                //noinspection GroovyAssignabilityCheck
+                sourceSets {
+                    //noinspection GroovyAssignabilityCheck
+                    main {
+                        manifest.srcFile "AndroidManifest.xml"
+                        res.srcDirs "res"
+                        assets.srcDirs "assets"
+                        java.srcDirs "src"
+                        jniLibs.srcDirs "lib"
+                    }
+                }
+
+                // Copy JAR dependencies into the libs directory for Eclipse.
+                //noinspection GroovyAssignabilityCheck
+                task deployLibs(type: Copy) {
+                    from { configurations.compile }
+                    into { "${project.projectDir}/libs" }
+                }
+
+                // Exclude a few files that are duplicated across our dependencies and
+                // prevent packaging Android applications.
+                packagingOptions {
+                    /* https://github.com/rosjava/android_core/issues/194 */
+                    exclude "META-INF/LICENSE.txt"
+                    exclude "META-INF/NOTICE.txt"
+                }
+            }
         }
     }
 }
+
+defaultTasks 'jar' , 'assembleRelease', 'uploadArchives'

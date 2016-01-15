@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package>
+    <name>android_ros_drivers</name>
+    <version>0.0.1</version>
+    <description>
+        Gets android sensors publishing on both the tango and other android devices.
+    </description>
+    <maintainer email="pgeneva@udel.edu">Patrick Geneva</maintainer>
+    <author email="pgeneva@udel.edu">Patrick Geneva</author>
+    <license>TODO</license>
+
+    <buildtool_depend>catkin</buildtool_depend>
+    <build_depend>rosjava_build_tools</build_depend>
+    <build_depend>rosjava_core</build_depend>
+</package>
