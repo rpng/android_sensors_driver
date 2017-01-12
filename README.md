@@ -3,6 +3,8 @@ This is a nice android application that allows for publishing of data from a pho
 This can be used to record a ROS bag of data or to preform SLAM on a higher powered computer.
 Note that this only works on phones that use the Camera1 API (so no newer camera2 api phones).
 If you are interested in recording data for a Camera2 API phone check out our other repository [android-dataset-recorder](https://github.com/rpng/android-dataset-recorder).
+Also note that on some phones the number of cameras that you can use is limited (and thus if you select more the app will fail).
+This is caused by a limit to the bandwidth over the camera buses on the physical phone hardware.
 
 
 
