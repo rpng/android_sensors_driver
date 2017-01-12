@@ -15,9 +15,9 @@ checkout screenshots
 * Press run button
 * Build will fail but suggest to install missing frameworks. Click on the link, install missing, and press run again.
 * You can choose to run on a simulator or on your phone
-** Phone
-*** Your phone must have developer mode enabled.
-*** Enter IP of rosmaster
-** Emulator
-*** IP of localhost of emulator computer is 10.0.0.2
-*** Enter 10.0.0.2 in your app in emulator, if ros is running at your local computer as well
+  * Phone
+    * Your phone must have developer mode enabled.
+    * Enter IP of rosmaster
+  * Emulator
+    * IP of localhost of emulator computer is 10.0.0.2
+    * Enter 10.0.0.2 in your app in emulator, if ros is running at your local computer as well
