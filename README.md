@@ -10,7 +10,7 @@ checkout screenshots
 # How to compile and install?
 
 * Downlaod Android Studio and install https://developer.android.com/studio/index.html
-* git clone https://github.com/plieningerweb/android_sensors_driver.git android_sensor_project
+* run `git clone https://github.com/plieningerweb/android_sensors_driver.git android_sensor_project`
 * open android_sensor_porject as existing project in Android Studio
 * Press run button
 * Build will fail but suggest to install missing frameworks. Click on the link, install missing, and press run again.
