@@ -19,6 +19,9 @@ apply plugin: 'com.android.application'
 
 dependencies {
     compile 'org.ros.android_core:android_10:[0.3,0.4)'
+    //note that 11.2 and above are in maven
+    //https://stackoverflow.com/a/45695269/7718197
+    compile 'com.google.android.gms:play-services-location:11.0.0'
 //    compile 'org.ros.rosjava_core:rosjava:[0.2.1)'
 //    compile 'org.ros.android_core:android_honeycomb_mr2:0.1.+'
     compile project(':opencv3')

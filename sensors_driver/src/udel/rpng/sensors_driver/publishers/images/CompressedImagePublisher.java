@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.android.android_sensors_driver.publishers.images;
+package udel.rpng.sensors_driver.publishers.images;
 
 import com.google.common.base.Preconditions;
 

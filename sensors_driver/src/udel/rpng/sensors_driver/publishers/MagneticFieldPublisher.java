@@ -27,7 +27,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.ros.android.android_sensors_driver.publishers;
+package udel.rpng.sensors_driver.publishers;
 
 
 import android.hardware.Sensor;
@@ -46,31 +46,29 @@ import org.ros.node.topic.Publisher;
 
 import java.util.List;
 
-import sensor_msgs.Temperature;
+import sensor_msgs.MagneticField;
 
 /**
  * @author chadrockey@gmail.com (Chad Rockey)
  * @author tal.regev@gmail.com  (Tal Regev)
  */
-public class TemperaturePublisher implements NodeMain {
+public class MagneticFieldPublisher implements NodeMain {
 
     private String robotName;
-    private TemperatureThread tmpThread;
+    private MagneticFieldThread mfThread;
     private SensorListener sensorListener;
     private SensorManager sensorManager;
-    private Publisher<Temperature> publisher;
-    private int sensorType;
+    private Publisher<MagneticField> publisher;
     private int sensorDelay;
 
-    public TemperaturePublisher(SensorManager manager, int sensorDelay, int sensorType, String robotName) {
+    public MagneticFieldPublisher(SensorManager manager, int sensorDelay,String robotName) {
         this.sensorManager = manager;
         this.sensorDelay = sensorDelay;
-        this.sensorType = sensorType;
         this.robotName = robotName;
     }
 
     public GraphName getDefaultNodeName() {
-        return GraphName.of("android_sensors_driver/temperature_publisher");
+        return GraphName.of("android_sensors_driver/magnetic_field_publisher");
     }
 
     public void onError(Node node, Throwable throwable) {
@@ -78,13 +76,13 @@ public class TemperaturePublisher implements NodeMain {
 
     public void onStart(ConnectedNode node) {
         try {
-            List<Sensor> mfList = this.sensorManager.getSensorList(sensorType);
+            List<Sensor> mfList = this.sensorManager.getSensorList(Sensor.TYPE_MAGNETIC_FIELD);
 
             if (mfList.size() > 0) {
-                this.publisher = node.newPublisher("/android/" + robotName + "/temperature", "sensor_msgs/Temperature");
+                this.publisher = node.newPublisher("/android/" + robotName + "/magnetic_field", "sensor_msgs/MagneticField");
                 this.sensorListener = new SensorListener(this.publisher);
-                this.tmpThread = new TemperatureThread(this.sensorManager, this.sensorListener);
-                this.tmpThread.start();
+                this.mfThread = new MagneticFieldThread(this.sensorManager, this.sensorListener);
+                this.mfThread.start();
             }
 
         } catch (Exception e) {
@@ -98,14 +96,14 @@ public class TemperaturePublisher implements NodeMain {
 
     //@Override
     public void onShutdown(Node arg0) {
-        if (this.tmpThread == null) {
+        if (this.mfThread == null) {
             return;
         }
 
-        this.tmpThread.shutdown();
+        this.mfThread.shutdown();
 
         try {
-            this.tmpThread.join();
+            this.mfThread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -115,23 +113,23 @@ public class TemperaturePublisher implements NodeMain {
     public void onShutdownComplete(Node arg0) {
     }
 
-    private class TemperatureThread extends Thread {
+    private class MagneticFieldThread extends Thread {
         private final SensorManager sensorManager;
-        private final Sensor tmpSensor;
+        private final Sensor mfSensor;
         private SensorListener sensorListener;
         private Looper threadLooper;
 
-        private TemperatureThread(SensorManager sensorManager, SensorListener sensorListener) {
+        private MagneticFieldThread(SensorManager sensorManager, SensorListener sensorListener) {
             this.sensorManager = sensorManager;
             this.sensorListener = sensorListener;
-            this.tmpSensor = this.sensorManager.getDefaultSensor(sensorType);
+            this.mfSensor = this.sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         }
 
 
         public void run() {
             Looper.prepare();
             this.threadLooper = Looper.myLooper();
-            this.sensorManager.registerListener(this.sensorListener, this.tmpSensor, sensorDelay);
+            this.sensorManager.registerListener(this.sensorListener, this.mfSensor, sensorDelay);
             Looper.loop();
         }
 
@@ -146,9 +144,9 @@ public class TemperaturePublisher implements NodeMain {
 
     private class SensorListener implements SensorEventListener {
 
-        private Publisher<Temperature> publisher;
+        private Publisher<MagneticField> publisher;
 
-        private SensorListener(Publisher<Temperature> publisher) {
+        private SensorListener(Publisher<MagneticField> publisher) {
             this.publisher = publisher;
         }
 
@@ -158,16 +156,20 @@ public class TemperaturePublisher implements NodeMain {
 
         //	@Override
         public void onSensorChanged(SensorEvent event) {
-            if (event.sensor.getType() == sensorType) {
-                Temperature msg = this.publisher.newMessage();
+            if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+                MagneticField msg = this.publisher.newMessage();
                 long time_delta_millis = System.currentTimeMillis() - SystemClock.uptimeMillis();
                 msg.getHeader().setStamp(Time.fromMillis(time_delta_millis + event.timestamp / 1000000));
-                msg.getHeader().setFrameId("/android/temperature");// TODO Make parameter
+                msg.getHeader().setFrameId("/android/magnetic_field");// TODO Make parameter
 
-                msg.setTemperature(event.values[0]);
-                msg.setVariance(0.0);
+                msg.getMagneticField().setX(event.values[0] / 1e6);
+                msg.getMagneticField().setY(event.values[1] / 1e6);
+                msg.getMagneticField().setZ(event.values[2] / 1e6);
 
-                this.publisher.publish(msg);
+                double[] tmpCov = {0, 0, 0, 0, 0, 0, 0, 0, 0}; // TODO Make Parameter
+                msg.setMagneticFieldCovariance(tmpCov);
+
+                publisher.publish(msg);
             }
         }
     }

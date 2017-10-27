@@ -1,11 +1,9 @@
-package org.ros.android.android_sensors_driver.utilities;
+package udel.rpng.sensors_driver.utilities;
 
 
-import android.content.Context;
 import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
-import android.location.LocationManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -15,18 +13,17 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.opencv.ml.Boost;
 import org.ros.address.InetAddressFactory;
-import org.ros.android.android_sensors_driver.MainActivity;
-import org.ros.android.android_sensors_driver.R;
-import org.ros.android.android_sensors_driver.publishers.FluidPressurePublisher;
-import org.ros.android.android_sensors_driver.publishers.IlluminancePublisher;
-import org.ros.android.android_sensors_driver.publishers.ImuPublisher;
-import org.ros.android.android_sensors_driver.publishers.MagneticFieldPublisher;
-import org.ros.android.android_sensors_driver.publishers.NavSatFixPublisher;
-import org.ros.android.android_sensors_driver.publishers.TemperaturePublisher;
-import org.ros.android.android_sensors_driver.publishers.images2.ImageParams;
-import org.ros.android.android_sensors_driver.publishers.images3.CameraManager;
+import udel.rpng.sensors_driver.MainActivity;
+import udel.rpng.sensors_driver.R;
+import udel.rpng.sensors_driver.publishers.FluidPressurePublisher;
+import udel.rpng.sensors_driver.publishers.IlluminancePublisher;
+import udel.rpng.sensors_driver.publishers.ImuPublisher;
+import udel.rpng.sensors_driver.publishers.MagneticFieldPublisher;
+import udel.rpng.sensors_driver.publishers.NavSatFixPublisher;
+import udel.rpng.sensors_driver.publishers.TemperaturePublisher;
+import udel.rpng.sensors_driver.publishers.images3.ImageParams;
+import udel.rpng.sensors_driver.publishers.images3.CameraManager;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 
@@ -67,11 +64,11 @@ public class Config {
     protected IlluminancePublisher pub_illuminance;
     protected ImuPublisher pub_imu;
     protected MagneticFieldPublisher pub_magnetic;
-    protected NavSatFixPublisher pub_navsat;
+    protected NavSatFixPublisher pub_navsat2;
     protected TemperaturePublisher pub_temp;
     protected CameraManager pub_cameras;
 
-    protected LocationManager mLocationManager;
+    //protected LocationManager mLocationManager;
     protected SensorManager mSensorManager;
 
 
@@ -100,7 +97,7 @@ public class Config {
         load_cameras();
 
         // Start the services we need
-        mLocationManager = (LocationManager) mainActivity.getSystemService(Context.LOCATION_SERVICE);
+        //mLocationManager = (LocationManager) mainActivity.getSystemService(Context.LOCATION_SERVICE);
         mSensorManager = (SensorManager) mainActivity.getSystemService(MainActivity.SENSOR_SERVICE);
     }
 
@@ -127,8 +124,7 @@ public class Config {
         // Use newer temperature if possible
         if (currentApiVersion >= android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             tempSensor = Sensor.TYPE_AMBIENT_TEMPERATURE;
-        }
-        else {
+        } else {
             //noinspection deprecation
             tempSensor = Sensor.TYPE_TEMPERATURE; // Older temperature
         }
@@ -139,7 +135,7 @@ public class Config {
             nodeMainExecutor.shutdownNodeMain(pub_illuminance);
             nodeMainExecutor.shutdownNodeMain(pub_imu);
             nodeMainExecutor.shutdownNodeMain(pub_magnetic);
-            nodeMainExecutor.shutdownNodeMain(pub_navsat);
+            nodeMainExecutor.shutdownNodeMain(pub_navsat2);
             nodeMainExecutor.shutdownNodeMain(pub_temp);
             nodeMainExecutor.shutdownNodeMain(pub_cameras);
             old_fluid = false;
@@ -155,7 +151,7 @@ public class Config {
         if(checkbox_fluid.isChecked() != old_fluid && checkbox_fluid.isChecked()) {
             NodeConfiguration nodeConfiguration1 = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
             nodeConfiguration1.setMasterUri(masterURI);
-            nodeConfiguration1.setNodeName("android_sensors_driver_pressure");
+            nodeConfiguration1.setNodeName("sensors_driver_pressure");
             this.pub_fluid = new FluidPressurePublisher(mSensorManager, sensorDelay, robot_name_text);
             nodeMainExecutor.execute(this.pub_fluid, nodeConfiguration1);
         }
@@ -169,7 +165,7 @@ public class Config {
         if(checkbox_illuminance.isChecked() != old_illuminance && checkbox_illuminance.isChecked()) {
             NodeConfiguration nodeConfiguration2 = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
             nodeConfiguration2.setMasterUri(masterURI);
-            nodeConfiguration2.setNodeName("android_sensors_driver_illuminance");
+            nodeConfiguration2.setNodeName("sensors_driver_illuminance");
             this.pub_illuminance = new IlluminancePublisher(mSensorManager, sensorDelay, robot_name_text);
             nodeMainExecutor.execute(this.pub_illuminance, nodeConfiguration2);
         }
@@ -183,7 +179,7 @@ public class Config {
         if(checkbox_imu.isChecked() != old_imu && checkbox_imu.isChecked()) {
             NodeConfiguration nodeConfiguration3 = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
             nodeConfiguration3.setMasterUri(masterURI);
-            nodeConfiguration3.setNodeName("android_sensors_driver_imu");
+            nodeConfiguration3.setNodeName("sensors_driver_imu");
             this.pub_imu = new ImuPublisher(mSensorManager, sensorDelay, robot_name_text);
             nodeMainExecutor.execute(this.pub_imu, nodeConfiguration3);
         }
@@ -197,7 +193,7 @@ public class Config {
         if(checkbox_magnetic.isChecked() != old_magnetic && checkbox_magnetic.isChecked()) {
             NodeConfiguration nodeConfiguration4 = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
             nodeConfiguration4.setMasterUri(masterURI);
-            nodeConfiguration4.setNodeName("android_sensors_driver_magnetic_field");
+            nodeConfiguration4.setNodeName("driver_magnetic_field");
             this.pub_magnetic = new MagneticFieldPublisher(mSensorManager, sensorDelay, robot_name_text);
             nodeMainExecutor.execute(this.pub_magnetic, nodeConfiguration4);
         }
@@ -211,21 +207,21 @@ public class Config {
         if(checkbox_navsat.isChecked() != old_navsat && checkbox_navsat.isChecked()) {
             NodeConfiguration nodeConfiguration5 = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
             nodeConfiguration5.setMasterUri(masterURI);
-            nodeConfiguration5.setNodeName("android_sensors_driver_nav_sat_fix");
-            this.pub_navsat = new NavSatFixPublisher(mLocationManager, robot_name_text);
-            nodeMainExecutor.execute(this.pub_navsat, nodeConfiguration5);
+            nodeConfiguration5.setNodeName("driver_navsatfix_publisher");
+            this.pub_navsat2 = new NavSatFixPublisher(mainActivity, robot_name_text);
+            nodeMainExecutor.execute(this.pub_navsat2, nodeConfiguration5);
         }
         // Navigation satellite node shutdown
         else if(checkbox_navsat.isChecked() != old_navsat) {
-            nodeMainExecutor.shutdownNodeMain(pub_navsat);
-            pub_navsat = null;
+            nodeMainExecutor.shutdownNodeMain(pub_navsat2);
+            pub_navsat2 = null;
         }
 
         // Temperature node startup
         if(checkbox_temp.isChecked() != old_temp && checkbox_temp.isChecked()) {
             NodeConfiguration nodeConfiguration6 = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
             nodeConfiguration6.setMasterUri(masterURI);
-            nodeConfiguration6.setNodeName("android_sensors_driver_temperature");
+            nodeConfiguration6.setNodeName("sensors_driver_temperature");
             this.pub_temp = new TemperaturePublisher(mSensorManager, sensorDelay, tempSensor, robot_name_text);
             nodeMainExecutor.execute(this.pub_temp, nodeConfiguration6);
         }
@@ -257,7 +253,7 @@ public class Config {
             if(cameras.size() > 0) {
                 NodeConfiguration nodeConfiguration7 = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
                 nodeConfiguration7.setMasterUri(masterURI);
-                nodeConfiguration7.setNodeName("android_sensors_driver_cameras");
+                nodeConfiguration7.setNodeName("sensors_driver_cameras");
                 pub_cameras = new CameraManager(mainActivity, cameras, robot_name_text, cameras_viewmode, cameras_compression);
                 nodeMainExecutor.execute(pub_cameras, nodeConfiguration7);
             }

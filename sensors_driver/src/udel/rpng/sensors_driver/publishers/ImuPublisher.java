@@ -27,7 +27,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.ros.android.android_sensors_driver.publishers;
+package udel.rpng.sensors_driver.publishers;
 
 
 import android.hardware.Sensor;

@@ -27,7 +27,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.ros.android.android_sensors_driver.publishers;
+package udel.rpng.sensors_driver.publishers;
 
 
 import android.hardware.Sensor;
@@ -46,29 +46,31 @@ import org.ros.node.topic.Publisher;
 
 import java.util.List;
 
-import sensor_msgs.Illuminance;
+import sensor_msgs.Temperature;
 
 /**
  * @author chadrockey@gmail.com (Chad Rockey)
  * @author tal.regev@gmail.com  (Tal Regev)
  */
-public class IlluminancePublisher implements NodeMain {
+public class TemperaturePublisher implements NodeMain {
 
     private String robotName;
-    private IlluminanceThread ilThread;
+    private TemperatureThread tmpThread;
     private SensorListener sensorListener;
     private SensorManager sensorManager;
-    private Publisher<Illuminance> publisher;
+    private Publisher<Temperature> publisher;
+    private int sensorType;
     private int sensorDelay;
 
-    public IlluminancePublisher(SensorManager manager, int sensorDelay, String robotName) {
+    public TemperaturePublisher(SensorManager manager, int sensorDelay, int sensorType, String robotName) {
         this.sensorManager = manager;
         this.sensorDelay = sensorDelay;
+        this.sensorType = sensorType;
         this.robotName = robotName;
     }
 
     public GraphName getDefaultNodeName() {
-        return GraphName.of("/android/illuminance_publisher");
+        return GraphName.of("sensors_driver/temperature_publisher");
     }
 
     public void onError(Node node, Throwable throwable) {
@@ -76,13 +78,13 @@ public class IlluminancePublisher implements NodeMain {
 
     public void onStart(ConnectedNode node) {
         try {
-            List<Sensor> mfList = this.sensorManager.getSensorList(Sensor.TYPE_LIGHT);
+            List<Sensor> mfList = this.sensorManager.getSensorList(sensorType);
 
             if (mfList.size() > 0) {
-                this.publisher = node.newPublisher("/android/" + robotName + "/illuminance", "sensor_msgs/Illuminance");
+                this.publisher = node.newPublisher("/android/" + robotName + "/temperature", "sensor_msgs/Temperature");
                 this.sensorListener = new SensorListener(this.publisher);
-                this.ilThread = new IlluminanceThread(this.sensorManager, this.sensorListener);
-                this.ilThread.start();
+                this.tmpThread = new TemperatureThread(this.sensorManager, this.sensorListener);
+                this.tmpThread.start();
             }
 
         } catch (Exception e) {
@@ -96,14 +98,14 @@ public class IlluminancePublisher implements NodeMain {
 
     //@Override
     public void onShutdown(Node arg0) {
-        if (this.ilThread == null) {
+        if (this.tmpThread == null) {
             return;
         }
 
-        this.ilThread.shutdown();
+        this.tmpThread.shutdown();
 
         try {
-            this.ilThread.join();
+            this.tmpThread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -113,23 +115,23 @@ public class IlluminancePublisher implements NodeMain {
     public void onShutdownComplete(Node arg0) {
     }
 
-    private class IlluminanceThread extends Thread {
+    private class TemperatureThread extends Thread {
         private final SensorManager sensorManager;
-        private final Sensor ilSensor;
+        private final Sensor tmpSensor;
         private SensorListener sensorListener;
         private Looper threadLooper;
 
-        private IlluminanceThread(SensorManager sensorManager, SensorListener sensorListener) {
+        private TemperatureThread(SensorManager sensorManager, SensorListener sensorListener) {
             this.sensorManager = sensorManager;
             this.sensorListener = sensorListener;
-            this.ilSensor = this.sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+            this.tmpSensor = this.sensorManager.getDefaultSensor(sensorType);
         }
 
 
         public void run() {
             Looper.prepare();
             this.threadLooper = Looper.myLooper();
-            this.sensorManager.registerListener(this.sensorListener, this.ilSensor, sensorDelay);
+            this.sensorManager.registerListener(this.sensorListener, this.tmpSensor, sensorDelay);
             Looper.loop();
         }
 
@@ -144,9 +146,9 @@ public class IlluminancePublisher implements NodeMain {
 
     private class SensorListener implements SensorEventListener {
 
-        private Publisher<Illuminance> publisher;
+        private Publisher<Temperature> publisher;
 
-        private SensorListener(Publisher<Illuminance> publisher) {
+        private SensorListener(Publisher<Temperature> publisher) {
             this.publisher = publisher;
         }
 
@@ -156,16 +158,16 @@ public class IlluminancePublisher implements NodeMain {
 
         //	@Override
         public void onSensorChanged(SensorEvent event) {
-            if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
-                Illuminance msg = this.publisher.newMessage();
+            if (event.sensor.getType() == sensorType) {
+                Temperature msg = this.publisher.newMessage();
                 long time_delta_millis = System.currentTimeMillis() - SystemClock.uptimeMillis();
                 msg.getHeader().setStamp(Time.fromMillis(time_delta_millis + event.timestamp / 1000000));
-                msg.getHeader().setFrameId("/android/illuminance"); // TODO Make parameter
+                msg.getHeader().setFrameId("/android/temperature");// TODO Make parameter
 
-                msg.setIlluminance(event.values[0]);
-                msg.setVariance(0.0); // TODO Make parameter
+                msg.setTemperature(event.values[0]);
+                msg.setVariance(0.0);
 
-                publisher.publish(msg);
+                this.publisher.publish(msg);
             }
         }
     }

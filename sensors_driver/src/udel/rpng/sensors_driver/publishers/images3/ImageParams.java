@@ -1,4 +1,4 @@
-package org.ros.android.android_sensors_driver.publishers.images2;
+package udel.rpng.sensors_driver.publishers.images3;
 
 public class ImageParams {
     public enum ViewMode {

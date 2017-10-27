@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.android.android_sensors_driver;
+package udel.rpng.sensors_driver;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -36,7 +36,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import org.ros.android.RosActivity;
-import org.ros.android.android_sensors_driver.utilities.Config;
+import udel.rpng.sensors_driver.utilities.Config;
 import org.ros.node.NodeMainExecutor;
 
 import java.net.URI;

@@ -27,40 +27,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.ros.android.android_sensors_driver.publishers.images3;
+package udel.rpng.sensors_driver.publishers.images3;
 
-import android.graphics.Bitmap;
 import android.hardware.Camera;
-import android.util.Log;
 
 import org.jboss.netty.buffer.ChannelBufferOutputStream;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
-import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.core.MatOfInt;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
-import org.ros.android.android_sensors_driver.publishers.images2.ImageParams;
 import org.ros.internal.message.MessageBuffers;
 import org.ros.message.Time;
 import org.ros.namespace.GraphName;
-import org.ros.namespace.NameResolver;
 import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
 
-import java.nio.ByteBuffer;
-
 import cv_bridge.CvImage;
-import sensor_msgs.CameraInfo;
 import sensor_msgs.CompressedImage;
 import sensor_msgs.Image;
 import sensor_msgs.ImageEncodings;
-
-import static org.opencv.core.Core.flip;
 
 
 /**

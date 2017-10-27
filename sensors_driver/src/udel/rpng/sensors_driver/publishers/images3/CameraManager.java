@@ -1,25 +1,17 @@
-package org.ros.android.android_sensors_driver.publishers.images3;
+package udel.rpng.sensors_driver.publishers.images3;
 
 
-import android.graphics.Camera;
-import android.view.Gravity;
-import android.view.SurfaceView;
-import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.StackView;
-import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ViewFlipper;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.JavaCameraView;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
-import org.ros.android.android_sensors_driver.MainActivity;
-import org.ros.android.android_sensors_driver.R;
-import org.ros.android.android_sensors_driver.publishers.images2.ImageParams;
+import udel.rpng.sensors_driver.MainActivity;
+import udel.rpng.sensors_driver.R;
+
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
@@ -40,7 +32,7 @@ public class CameraManager  implements NodeMain {
     private MainActivity mainActivity;
     private ConnectedNode node = null;
 
-    ViewFlipper layout;
+    LinearLayout layout;
     LinearLayout.LayoutParams params;
 
     public CameraManager(MainActivity mainAct, ArrayList<Integer> camera_ids, String robotName, ArrayList<ImageParams.ViewMode> cameras_viewmode, ArrayList<ImageParams.CompressionLevel> cameras_compression) {
@@ -50,7 +42,7 @@ public class CameraManager  implements NodeMain {
         this.cameras_viewmode = cameras_viewmode;
         this.cameras_compression = cameras_compression;
         // Layout variables
-        layout = (ViewFlipper) mainActivity.findViewById(R.id.view_main);
+        layout = (LinearLayout) mainActivity.findViewById(R.id.view_main_content);
         params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
     }
 

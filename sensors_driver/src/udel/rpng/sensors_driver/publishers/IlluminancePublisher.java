@@ -27,7 +27,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.ros.android.android_sensors_driver.publishers;
+package udel.rpng.sensors_driver.publishers;
 
 
 import android.hardware.Sensor;
@@ -46,29 +46,29 @@ import org.ros.node.topic.Publisher;
 
 import java.util.List;
 
-import sensor_msgs.MagneticField;
+import sensor_msgs.Illuminance;
 
 /**
  * @author chadrockey@gmail.com (Chad Rockey)
  * @author tal.regev@gmail.com  (Tal Regev)
  */
-public class MagneticFieldPublisher implements NodeMain {
+public class IlluminancePublisher implements NodeMain {
 
     private String robotName;
-    private MagneticFieldThread mfThread;
+    private IlluminanceThread ilThread;
     private SensorListener sensorListener;
     private SensorManager sensorManager;
-    private Publisher<MagneticField> publisher;
+    private Publisher<Illuminance> publisher;
     private int sensorDelay;
 
-    public MagneticFieldPublisher(SensorManager manager, int sensorDelay,String robotName) {
+    public IlluminancePublisher(SensorManager manager, int sensorDelay, String robotName) {
         this.sensorManager = manager;
         this.sensorDelay = sensorDelay;
         this.robotName = robotName;
     }
 
     public GraphName getDefaultNodeName() {
-        return GraphName.of("android_sensors_driver/magnetic_field_publisher");
+        return GraphName.of("/android/illuminance_publisher");
     }
 
     public void onError(Node node, Throwable throwable) {
@@ -76,13 +76,13 @@ public class MagneticFieldPublisher implements NodeMain {
 
     public void onStart(ConnectedNode node) {
         try {
-            List<Sensor> mfList = this.sensorManager.getSensorList(Sensor.TYPE_MAGNETIC_FIELD);
+            List<Sensor> mfList = this.sensorManager.getSensorList(Sensor.TYPE_LIGHT);
 
             if (mfList.size() > 0) {
-                this.publisher = node.newPublisher("/android/" + robotName + "/magnetic_field", "sensor_msgs/MagneticField");
+                this.publisher = node.newPublisher("/android/" + robotName + "/illuminance", "sensor_msgs/Illuminance");
                 this.sensorListener = new SensorListener(this.publisher);
-                this.mfThread = new MagneticFieldThread(this.sensorManager, this.sensorListener);
-                this.mfThread.start();
+                this.ilThread = new IlluminanceThread(this.sensorManager, this.sensorListener);
+                this.ilThread.start();
             }
 
         } catch (Exception e) {
@@ -96,14 +96,14 @@ public class MagneticFieldPublisher implements NodeMain {
 
     //@Override
     public void onShutdown(Node arg0) {
-        if (this.mfThread == null) {
+        if (this.ilThread == null) {
             return;
         }
 
-        this.mfThread.shutdown();
+        this.ilThread.shutdown();
 
         try {
-            this.mfThread.join();
+            this.ilThread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -113,23 +113,23 @@ public class MagneticFieldPublisher implements NodeMain {
     public void onShutdownComplete(Node arg0) {
     }
 
-    private class MagneticFieldThread extends Thread {
+    private class IlluminanceThread extends Thread {
         private final SensorManager sensorManager;
-        private final Sensor mfSensor;
+        private final Sensor ilSensor;
         private SensorListener sensorListener;
         private Looper threadLooper;
 
-        private MagneticFieldThread(SensorManager sensorManager, SensorListener sensorListener) {
+        private IlluminanceThread(SensorManager sensorManager, SensorListener sensorListener) {
             this.sensorManager = sensorManager;
             this.sensorListener = sensorListener;
-            this.mfSensor = this.sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+            this.ilSensor = this.sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
         }
 
 
         public void run() {
             Looper.prepare();
             this.threadLooper = Looper.myLooper();
-            this.sensorManager.registerListener(this.sensorListener, this.mfSensor, sensorDelay);
+            this.sensorManager.registerListener(this.sensorListener, this.ilSensor, sensorDelay);
             Looper.loop();
         }
 
@@ -144,9 +144,9 @@ public class MagneticFieldPublisher implements NodeMain {
 
     private class SensorListener implements SensorEventListener {
 
-        private Publisher<MagneticField> publisher;
+        private Publisher<Illuminance> publisher;
 
-        private SensorListener(Publisher<MagneticField> publisher) {
+        private SensorListener(Publisher<Illuminance> publisher) {
             this.publisher = publisher;
         }
 
@@ -156,18 +156,14 @@ public class MagneticFieldPublisher implements NodeMain {
 
         //	@Override
         public void onSensorChanged(SensorEvent event) {
-            if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-                MagneticField msg = this.publisher.newMessage();
+            if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
+                Illuminance msg = this.publisher.newMessage();
                 long time_delta_millis = System.currentTimeMillis() - SystemClock.uptimeMillis();
                 msg.getHeader().setStamp(Time.fromMillis(time_delta_millis + event.timestamp / 1000000));
-                msg.getHeader().setFrameId("/android/magnetic_field");// TODO Make parameter
+                msg.getHeader().setFrameId("/android/illuminance"); // TODO Make parameter
 
-                msg.getMagneticField().setX(event.values[0] / 1e6);
-                msg.getMagneticField().setY(event.values[1] / 1e6);
-                msg.getMagneticField().setZ(event.values[2] / 1e6);
-
-                double[] tmpCov = {0, 0, 0, 0, 0, 0, 0, 0, 0}; // TODO Make Parameter
-                msg.setMagneticFieldCovariance(tmpCov);
+                msg.setIlluminance(event.values[0]);
+                msg.setVariance(0.0); // TODO Make parameter
 
                 publisher.publish(msg);
             }

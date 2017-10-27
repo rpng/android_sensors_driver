@@ -1,4 +1,4 @@
-package org.ros.android.android_sensors_driver.publishers.images;
+package udel.rpng.sensors_driver.publishers.images;
 
 import android.graphics.ImageFormat;
 import android.hardware.Camera;
@@ -9,10 +9,11 @@ import android.view.SurfaceView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.ros.android.android_sensors_driver.MainActivity;
-import org.ros.android.android_sensors_driver.publishers.images.CompressedImagePublisher;
-import org.ros.android.android_sensors_driver.publishers.images.RawImageListener;
-import org.ros.android.android_sensors_driver.publishers.images.RawImagePublisher;
+import udel.rpng.sensors_driver.MainActivity;
+import udel.rpng.sensors_driver.R;
+import udel.rpng.sensors_driver.publishers.images.CompressedImagePublisher;
+import udel.rpng.sensors_driver.publishers.images.RawImageListener;
+import udel.rpng.sensors_driver.publishers.images.RawImagePublisher;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
@@ -197,12 +198,12 @@ public class CamerasPublishers implements NodeMain {
             }
 
             // Add our surface to the main view
-            // Note if a suface is not added, the camera wil not publish
+            // Note if a surface is not added, the camera wil not publish
             mainActivity.runOnUiThread(new Runnable() {
                 public void run() {
-
-                    LinearLayout layout = new LinearLayout(mainActivity.getBaseContext());
-                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
+                    //LinearLayout layout = new LinearLayout(mainActivity.getBaseContext());
+                    LinearLayout layout = (LinearLayout) mainActivity.findViewById(R.id.view_main);
+                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 0f);
                     for(int i=0; i<camera_ids.length; i++) {
                         if(surfaceViews[i] == null) {
                             TextView textView = new TextView(mainActivity.getBaseContext());
