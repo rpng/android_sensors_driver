@@ -12,7 +12,7 @@ This has been tested on the "Yellowstone" [Tango Tablet Development Kit](https:/
 
 * Downlaod Android Studio and install https://developer.android.com/studio/index.html
 * Run `git clone https://github.com/rpng/android_sensors_driver.git android_sensor_project`
-* Open android_sensor_porject as existing project in Android Studio
+* Open `android_sensor_project` as existing project in Android Studio
 * Press run button
 * Build will fail but suggest to install missing frameworks. Click on the link, install missing, and press run again.
 * You can choose to run on a simulator or on your phone
@@ -23,8 +23,9 @@ This has been tested on the "Yellowstone" [Tango Tablet Development Kit](https:/
     * IP of localhost of emulator computer is 10.0.0.2
     * Enter 10.0.0.2 in your app in emulator, if ros is running at your local computer as well
 * Please open an issue if you are unable to build
+* To calibrate your camera, we recommend recording a bag and using [kalibr](https://github.com/ethz-asl/kalibr).
 
-## Published
+## Published Topics
 
 * Camera compressed feed (if enabled) - `/android/tango1/camera_#/image/compressed`
 * Camera raw feed (if no compression) - `/android/tango1/camera_#/image_raw`
