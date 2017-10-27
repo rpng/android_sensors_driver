@@ -26,6 +26,7 @@ This is caused by a limit to the bandwidth over the camera buses on the physical
 
 ## Screenshots
 
-![Screenshot 1](android_sensors_driver/screenshots/Screenshot_2016-01-11-11-53-21.png?raw=true)
-![Screenshot 1](android_sensors_driver/screenshots/Screenshot_2016-01-11-11-48-04.png?raw=true)
-
+![Screenshot 1](screenshots/Screenshot_2016-01-11-11-53-21.png)
+![Screenshot 2](screenshots/Screenshot_2016-01-11-11-48-04.png)
+![Screenshot 3](screenshots/Screenshot_2017-10-27-12-22-12.png)
+![Screenshot 4](screenshots/Screenshot_2017-10-27-12-25-37.png)
