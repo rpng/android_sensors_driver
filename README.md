@@ -11,8 +11,8 @@ This is caused by a limit to the bandwidth over the camera buses on the physical
 ## How to compile and install?
 
 * Downlaod Android Studio and install https://developer.android.com/studio/index.html
-* run `git clone https://github.com/rpng/android_sensors_driver.git android_sensor_project`
-* open android_sensor_porject as existing project in Android Studio
+* Run `git clone https://github.com/rpng/android_sensors_driver.git android_sensor_project`
+* Open android_sensor_porject as existing project in Android Studio
 * Press run button
 * Build will fail but suggest to install missing frameworks. Click on the link, install missing, and press run again.
 * You can choose to run on a simulator or on your phone
@@ -22,11 +22,10 @@ This is caused by a limit to the bandwidth over the camera buses on the physical
   * Emulator
     * IP of localhost of emulator computer is 10.0.0.2
     * Enter 10.0.0.2 in your app in emulator, if ros is running at your local computer as well
-
+* Please open an issue if you are unable to build
 
 ## Screenshots
 
 ![Screenshot 1](screenshots/Screenshot_2016-01-11-11-53-21.png)
-![Screenshot 2](screenshots/Screenshot_2016-01-11-11-48-04.png)
 ![Screenshot 3](screenshots/Screenshot_2017-10-27-12-22-12.png)
 ![Screenshot 4](screenshots/Screenshot_2017-10-27-12-25-37.png)
