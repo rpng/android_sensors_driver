@@ -28,11 +28,11 @@
  */
 
 task wrapper(type: Wrapper) {
-    gradleVersion = "2.7"
+    gradleVersion = "2.14.1"
 }
 
 buildscript {
-    apply from: project.file("buildscript.gradle")
+    apply from: "https://github.com/rosjava/android_core/raw/kinetic/buildscript.gradle"
 }
 
 apply plugin: "catkin"
@@ -42,86 +42,15 @@ allprojects {
     version = project.catkin.pkg.version
 }
 
-String version = project.catkin.pkg.version
-int versionNum = Integer.valueOf(version.replace(".", ""))
-
-
 subprojects {
-
-    /*
-     * The ros plugin configures a few things:
-     *
-     *  - local deployment repository : where it dumps the jars and packaged artifacts)
-     *  - local maven repositories    : where it finds your locally installed/built artifacts)
-     *  - external maven repositories : where it goes looking if it can't find dependencies locally
-     *
-     * To modify, or add repos to the default external maven repositories list, pull request against this code:
-     *
-     *   https://github.com/rosjava/rosjava_bootstrap/blob/indigo/gradle_plugins/src/main/groovy/org/ros/gradle_plugins/RosPlugin.groovy#L31
-     */
-    if (name == "image") {
-        apply plugin: "ros-java"
-        apply plugin: "osgi"
-        apply plugin: "idea"
-        apply plugin: "eclipse"
-    }
-
-
-    /*
-     * The android plugin configures a few things:
-     *
-     *  - local deployment repository : where it dumps the jars and packaged artifacts)
-     *  - local maven repositories    : where it finds your locally installed/built artifacts)
-     *  - external maven repositories : where it goes looking if it can't find dependencies locally
-     *  - android build tools version : which version we use across the board
-     *
-     * To modify, or add repos to the default external maven repositories list, pull request against this code:
-     *
-     *   https://github.com/rosjava/rosjava_bootstrap/blob/indigo/gradle_plugins/src/main/groovy/org/ros/gradle_plugins/RosPlugin.groovy#L31
-     *
-     * To modify the build tools version, pull request against this code:
-     *
-     *   https://github.com/rosjava/rosjava_bootstrap/blob/indigo/gradle_plugins/src/main/groovy/org/ros/gradle_plugins/RosAndroid.groovy#L14
-     */
+    apply plugin: 'ros-android'
     afterEvaluate { project ->
-        if (name != "image") {
-            apply plugin: "ros-android"
-            android {
-                compileSdkVersion 23
-                buildToolsVersion "23.0.2"
-
-                defaultConfig {
-                    versionName version
-                    versionCode versionNum
-                }
-
-                // Change the layout of Android projects to be compatible with Eclipse.
-                //noinspection GroovyAssignabilityCheck
-                sourceSets {
-                    //noinspection GroovyAssignabilityCheck
-                    main {
-                        manifest.srcFile "AndroidManifest.xml"
-                        res.srcDirs "res"
-                        assets.srcDirs "assets"
-                        java.srcDirs "src"
-                        jniLibs.srcDirs "lib"
-                    }
-                }
-
-                // Copy JAR dependencies into the libs directory for Eclipse.
-                //noinspection GroovyAssignabilityCheck
-                task deployLibs(type: Copy) {
-                    from { configurations.compile }
-                    into { "${project.projectDir}/libs" }
-                }
-
-                // Exclude a few files that are duplicated across our dependencies and
-                // prevent packaging Android applications.
-                packagingOptions {
-                    /* https://github.com/rosjava/android_core/issues/194 */
-                    exclude "META-INF/LICENSE.txt"
-                    exclude "META-INF/NOTICE.txt"
-                }
+        android {
+            // Exclude a few files that are duplicated across our dependencies and
+            // prevent packaging Android applications.
+            packagingOptions {
+                exclude "META-INF/LICENSE.txt"
+                exclude "META-INF/NOTICE.txt"
             }
         }
     }
