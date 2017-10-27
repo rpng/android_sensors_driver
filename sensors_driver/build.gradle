@@ -14,25 +14,36 @@
  * the License.
  */
 
-apply plugin: "ros-android"
+//apply plugin: "ros-android"
 apply plugin: 'com.android.application'
 
 dependencies {
-    compile 'org.ros.rosjava_core:rosjava:[0.2.1)'
-    compile 'org.ros.android_core:android_honeycomb_mr2:0.1.+'
+    compile 'org.ros.android_core:android_10:[0.3,0.4)'
+//    compile 'org.ros.rosjava_core:rosjava:[0.2.1)'
+//    compile 'org.ros.android_core:android_honeycomb_mr2:0.1.+'
     compile project(':opencv3')
     compile project(':cv_bridge')
 }
 
 
 android {
-    compileSdkVersion 15
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
     defaultConfig {
         minSdkVersion 15
-        applicationId "org.ros.android.android_sensors_driver"
+        applicationId "udel.android_sensors_driver"
         targetSdkVersion 19
         versionCode 1
         versionName "1.0"
+    }
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            resources.srcDirs = ['src']
+            res.srcDirs = ['res']
+            aidl.srcDirs = ['src']
+        }
     }
     compileOptions {
         targetCompatibility JavaVersion.VERSION_1_6

@@ -1,5 +1,4 @@
 include "image"
-//include "opencv"
 include "opencv3"
-//include "cv_bridge"
-//include "sensors_driver"
+include "cv_bridge"
+include "sensors_driver"
